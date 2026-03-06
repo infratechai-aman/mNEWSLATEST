@@ -432,7 +432,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="text-3xl">📰</div>
             <div>
@@ -440,7 +440,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
               <p className="text-sm text-gray-500">Welcome, {user?.name || user?.email}</p>
             </div>
           </div>
-          <Button variant="outline" onClick={onLogout} className="flex items-center gap-2">
+          <Button variant="outline" onClick={onLogout} className="w-full sm:w-auto flex items-center gap-2">
             <LogOut className="h-4 w-4" /> Logout
           </Button>
         </div>
@@ -448,19 +448,19 @@ const ReporterDashboard = ({ user, onLogout }) => {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 w-full overflow-x-auto whitespace-nowrap justify-start gap-1">
 
-            <TabsTrigger value="submit-news" className="flex items-center gap-2">
+            <TabsTrigger value="submit-news" className="shrink-0 min-h-10 px-3 flex items-center gap-2">
               <Newspaper className="h-4 w-4" /> {editingNewsItem ? 'Edit News' : 'Submit News'}
             </TabsTrigger>
 
-            <TabsTrigger value="my-news" className="flex items-center gap-2">
+            <TabsTrigger value="my-news" className="shrink-0 min-h-10 px-3 flex items-center gap-2">
               <Clock className="h-4 w-4" /> My Submissions
             </TabsTrigger>
-            <TabsTrigger value="breaking-ticker" className="flex items-center gap-2">
+            <TabsTrigger value="breaking-ticker" className="shrink-0 min-h-10 px-3 flex items-center gap-2">
               <Radio className="h-4 w-4" /> Breaking Ticker
             </TabsTrigger>
-            <TabsTrigger value="e-newspaper" className="flex items-center gap-2">
+            <TabsTrigger value="e-newspaper" className="shrink-0 min-h-10 px-3 flex items-center gap-2">
               <FileText className="h-4 w-4" /> E-Newspaper
             </TabsTrigger>
           </TabsList>
@@ -550,7 +550,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   {/* Main Image with Upload */}
                   <div>
                     <label className="block text-sm font-medium mb-1">Main Image</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="url"
                         value={newsFormData.mainImage}
@@ -586,7 +586,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   {/* Second Image (Optional) */}
                   <div>
                     <label className="block text-sm font-medium mb-1">Second Image (Optional)</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="url"
                         value={newsFormData.secondImage}
@@ -634,7 +634,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   {/* Single Thumbnail URL */}
                   <div>
                     <label className="block text-sm font-medium mb-1">Thumbnail Image</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="url"
                         value={newsFormData.thumbnailUrl}
@@ -718,7 +718,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   </div>
 
                   {/* Toggles: Featured & Show on Home */}
-                  <div className="flex items-center gap-8 py-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 py-2">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -740,7 +740,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   </div>
 
                   {/* Submit Button */}
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                       {editingNewsItem ? 'Update & Resubmit' : 'Submit for Review'}
                     </Button>
@@ -767,7 +767,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
           {/* MY SUBMISSIONS TAB */}
           <TabsContent value="my-news">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <CardTitle>My Submissions</CardTitle>
                 <Button variant="outline" size="sm" onClick={fetchMyNews}>Refresh</Button>
               </CardHeader>
@@ -778,7 +778,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   <div className="space-y-3">
                     {myNews.map((article) => (
                       <div key={article.id} className="p-4 bg-white rounded-lg border hover:border-blue-400 hover:shadow-md cursor-pointer transition-all" onClick={() => setSelectedSubmission(article)}>
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div className="flex-1">
                             <h3 className="font-semibold">{getArticleTitle(article)}</h3>
                             <p className="text-sm text-gray-500 mt-1">{article.categoryId}</p>
@@ -790,8 +790,8 @@ const ReporterDashboard = ({ user, onLogout }) => {
                               </div>
                             )}
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:items-end gap-2">
+                            <div className="flex items-center flex-wrap gap-2">
                               {(article.approvalStatus === 'pending' || article.approvalStatus === 'rejected') && (
                                 <Button size="sm" variant="outline" className="text-blue-600 h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); handleEditNews(article) }}>
                                   <Edit className="h-4 w-4" />
@@ -822,7 +822,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
 
           <TabsContent value="breaking-ticker">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <CardTitle>Breaking Ticker</CardTitle>
                 <Button variant="outline" size="sm" onClick={fetchTicker}>Refresh</Button>
               </CardHeader>
@@ -851,7 +851,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   />
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <Button
                     className="bg-blue-600 hover:bg-blue-700"
                     onClick={handleSaveTicker}
@@ -937,7 +937,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                       <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={savingPaper || uploadingPdf}>
                         {uploadingPdf ? 'Uploading PDF...' : savingPaper ? 'Saving...' : 'Submit E-Newspaper'}
                       </Button>
@@ -949,7 +949,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <CardTitle>My E-Newspaper Submissions</CardTitle>
                   <Button variant="outline" size="sm" onClick={fetchMyPapers}>Refresh</Button>
                 </CardHeader>
@@ -959,7 +959,7 @@ const ReporterDashboard = ({ user, onLogout }) => {
                   ) : (
                     <div className="space-y-3">
                       {myPapers.map((paper) => (
-                        <div key={paper.id} className="p-4 border rounded-lg bg-white flex items-start justify-between gap-4">
+                        <div key={paper.id} className="p-4 border rounded-lg bg-white flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                           <div>
                             <h3 className="font-semibold">{paper.title}</h3>
                             <p className="text-sm text-gray-500">Edition: {paper.editionDate || 'N/A'}</p>

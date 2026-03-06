@@ -369,7 +369,7 @@ const Header = ({ user, currentView, setCurrentView, handleLogout }) => {
       {/* --- PREMIUM MOBILE HEADER (Small Screens) --- */}
       <div className="lg:hidden">
         {/* Top White Bar: Main Navigation */}
-        <div className="bg-white text-gray-900 border-b border-gray-100 flex items-center justify-between px-4 h-16 sticky top-0 z-50">
+        <div className="bg-white text-gray-900 border-b border-gray-100 flex items-center justify-between px-3 sm:px-4 h-16 sticky top-0 z-50">
 
           {/* Left: Hamburger Menu */}
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 hover:bg-gray-50 rounded-full transition-colors active:scale-95">
@@ -377,8 +377,8 @@ const Header = ({ user, currentView, setCurrentView, handleLogout }) => {
           </button>
 
           {/* Center: Logo */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer pt-1" onClick={() => setCurrentView('home')}>
-            <div className="flex-shrink-0 w-72 h-20 relative cursor-pointer z-50">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer pt-0.5" onClick={() => setCurrentView('home')}>
+            <div className="flex-shrink-0 w-44 sm:w-56 h-12 sm:h-14 relative cursor-pointer z-50">
               <VideoLogo className="w-full h-full" />
             </div>
           </div>

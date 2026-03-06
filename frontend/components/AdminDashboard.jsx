@@ -1186,14 +1186,14 @@ const AdminDashboard = ({ user, toast }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
             Admin Dashboard
           </h1>
           <p className="text-muted-foreground">Welcome back, {user?.name || 'Admin'}</p>
         </div>
-        <Button onClick={loadPendingData} variant="outline" disabled={refreshing}>
+        <Button onClick={loadPendingData} variant="outline" disabled={refreshing} className="w-full sm:w-auto">
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
@@ -1201,24 +1201,24 @@ const AdminDashboard = ({ user, toast }) => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-5 lg:grid-cols-11 gap-1 h-auto p-1">
-          <TabsTrigger value="overview" className="flex items-center gap-1 text-xs">
+        <TabsList className="flex w-full overflow-x-auto whitespace-nowrap gap-1 h-auto p-1 justify-start">
+          <TabsTrigger value="overview" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <LayoutDashboard className="h-3 w-3" />
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
 
-          <TabsTrigger value="breaking" className="flex items-center gap-1 text-xs">
+          <TabsTrigger value="breaking" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <AlertCircle className="h-3 w-3" />
             <span className="hidden sm:inline">Breaking</span>
           </TabsTrigger>
 
-          <TabsTrigger value="navigation" className="flex items-center gap-1 text-xs">
+          <TabsTrigger value="navigation" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <Navigation className="h-3 w-3" />
             <span className="hidden sm:inline">Navigation</span>
           </TabsTrigger>
 
 
-          <TabsTrigger value="businesses" className="flex items-center gap-1 text-xs relative">
+          <TabsTrigger value="businesses" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs relative">
             <Building2 className="h-3 w-3" />
             <span className="hidden sm:inline">Business</span>
             {pendingData.businesses.length > 0 && (
@@ -1227,7 +1227,7 @@ const AdminDashboard = ({ user, toast }) => {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="classifieds" className="flex items-center gap-1 text-xs relative">
+          <TabsTrigger value="classifieds" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs relative">
             <Tag className="h-3 w-3" />
             <span className="hidden sm:inline">Classifieds</span>
             {pendingData.classifieds.length > 0 && (
@@ -1236,7 +1236,7 @@ const AdminDashboard = ({ user, toast }) => {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="reporters" className="flex items-center gap-1 text-xs relative">
+          <TabsTrigger value="reporters" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs relative">
             <Users className="h-3 w-3" />
             <span className="hidden sm:inline">Reporters</span>
             {pendingData.users.length > 0 && (
@@ -1245,21 +1245,21 @@ const AdminDashboard = ({ user, toast }) => {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="enewspaper" className="flex items-center gap-1 text-xs">
+          <TabsTrigger value="enewspaper" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <FileText className="h-3 w-3" />
             <span className="hidden sm:inline">E-Paper</span>
           </TabsTrigger>
-          <TabsTrigger value="live-tv" className="flex items-center gap-1 text-xs bg-red-50">
+          <TabsTrigger value="live-tv" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs bg-red-50">
             <Video className="h-3 w-3 text-red-600" />
             <span className="hidden sm:inline text-red-700">Live TV</span>
           </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-1 text-xs">
+          <TabsTrigger value="content" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <Monitor className="h-3 w-3" />
             <span className="hidden sm:inline">Content</span>
           </TabsTrigger>
 
 
-          <TabsTrigger value="manage-news" className="flex items-center gap-1 text-xs bg-blue-50 relative">
+          <TabsTrigger value="manage-news" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs bg-blue-50 relative">
             <Newspaper className="h-3 w-3 text-blue-600" />
             <span className="hidden sm:inline text-blue-700">Mgmt News</span>
             {pendingData.news.length > 0 && (
@@ -1268,7 +1268,7 @@ const AdminDashboard = ({ user, toast }) => {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-1 text-xs">
+          <TabsTrigger value="settings" className="shrink-0 min-h-9 px-3 flex items-center gap-1 text-xs">
             <Settings className="h-3 w-3" />
             <span className="hidden sm:inline">Settings</span>
           </TabsTrigger>
