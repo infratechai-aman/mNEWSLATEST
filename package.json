@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "qa:test": "playwright test",
+    "qa:test:headed": "playwright test --headed",
+    "qa:test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  }
+}

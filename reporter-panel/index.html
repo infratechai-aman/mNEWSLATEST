@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maithili Reporter Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/panel-suite.css" />
+</head>
+<body class="panel-shell" data-panel-app="reporter">
+  <section id="reporterLoginView" class="panel-login">
+    <div class="panel-login-card">
+      <p class="panel-muted">Maithili News CMS</p>
+      <h1>Reporter Login</h1>
+      <p class="panel-muted">Login with reporter account approved by admin.</p>
+      <p id="reporterError" class="panel-error panel-hidden"></p>
+      <form id="reporterLoginForm">
+        <input id="reporterEmail" class="panel-input" type="email" placeholder="Reporter email" style="margin-top:0.5rem;" />
+        <input id="reporterPassword" class="panel-input" type="password" placeholder="Password" style="margin-top:0.5rem;" />
+        <button class="panel-btn" type="submit" style="margin-top:0.7rem; width:100%;">Login</button>
+      </form>
+      <div class="panel-card" style="margin-top:0.8rem; background:#111827; border-color:#334155;">
+        <h3 style="margin-top:0; color:#fff;">Apply for Reporter Access</h3>
+        <form id="applyReporterForm">
+          <input id="applyName" class="panel-input" type="text" placeholder="Full name" />
+          <input id="applyEmail" class="panel-input" type="email" placeholder="Email" style="margin-top:0.45rem;" />
+          <input id="applyPhone" class="panel-input" type="text" placeholder="Phone" style="margin-top:0.45rem;" />
+          <input id="applyPassword" class="panel-input" type="password" placeholder="Choose password" style="margin-top:0.45rem;" />
+          <button class="panel-btn green" type="submit" style="margin-top:0.6rem;">Submit Application</button>
+        </form>
+      </div>
+      <p class="panel-muted" style="margin-top:0.8rem;">Admin panel: <a href="/admin-panel/" style="color:#93c5fd;">open</a></p>
+    </div>
+  </section>
+
+  <section id="reporterDashView" class="panel-hidden">
+    <header class="panel-top">
+      <div class="row">
+        <div class="panel-brand">Maithili Reporter Panel</div>
+        <div class="panel-row">
+          <a href="/admin-panel/" class="panel-btn slate" style="text-decoration:none;">Admin Panel</a>
+          <button id="reporterLogout" class="panel-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="panel-page">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">Reporter Dashboard</h1>
+          <p id="reporterWelcome" class="panel-sub">Welcome, Reporter</p>
+        </div>
+        <button id="reporterRefresh" class="panel-btn panel-refresh" type="button">↻ Refresh</button>
+      </div>
+
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab-btn="overview" data-icon="◧">Overview</button>
+        <button class="panel-tab" data-tab-btn="submit" data-icon="▦">Submit News</button>
+        <button class="panel-tab" data-tab-btn="mynews" data-icon="▤">My Queue</button>
+        <button class="panel-tab" data-tab-btn="breaking" data-icon="◉">Breaking Suggestion</button>
+      </div>
+
+      <section class="panel-section" data-tab="overview">
+        <div class="panel-grid-4">
+          <article class="panel-stat" data-icon="▤"><span>My News</span><strong id="myNewsCount">0</strong></article>
+          <article class="panel-stat" data-icon="◷"><span>Pending</span><strong id="myPendingCount">0</strong></article>
+          <article class="panel-stat" data-icon="✓"><span>Published</span><strong id="myPublishedCount">0</strong></article>
+          <article class="panel-stat" data-icon="◌"><span>Role</span><strong style="font-size:1.1rem;">Reporter</strong></article>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="submit">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Submit News for Review</h2>
+          <form id="reporterNewsForm" class="panel-grid-2">
+            <div>
+              <label for="rNewsTitle">Title *</label>
+              <input id="rNewsTitle" class="panel-input" type="text" placeholder="Article title" required />
+            </div>
+            <div>
+              <label for="rNewsCategory">Category * (Mandatory)</label>
+              <select id="rNewsCategory" class="panel-select" required>
+                <option value="">Select category</option>
+                <option>City News</option>
+                <option>Politics</option>
+                <option>India</option>
+                <option>Bihar</option>
+                <option>World</option>
+                <option>Business</option>
+                <option>Technology</option>
+                <option>Sports</option>
+                <option>Entertainment</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="rNewsCity">City (Optional)</label>
+              <input id="rNewsCity" class="panel-input" type="text" placeholder="Select city (optional)" />
+            </div>
+            <div>
+              <label for="rNewsMainImage">Main Image URL</label>
+              <input id="rNewsMainImage" class="panel-input" type="url" placeholder="https://image-url.jpg" />
+            </div>
+
+            <div>
+              <label for="rNewsSecondImage">Second Image URL (Optional)</label>
+              <input id="rNewsSecondImage" class="panel-input" type="url" placeholder="https://image-url.jpg" />
+            </div>
+            <div>
+              <label for="rNewsVideoUrl">YouTube / Video URL</label>
+              <input id="rNewsVideoUrl" class="panel-input" type="url" placeholder="https://youtube.com/watch?v=..." />
+            </div>
+
+            <div>
+              <label for="rNewsThumb">Thumbnail Image URL</label>
+              <input id="rNewsThumb" class="panel-input" type="url" placeholder="https://thumbnail-url.jpg" />
+            </div>
+            <div>
+              <label for="rNewsAuthor">Author Name</label>
+              <input id="rNewsAuthor" class="panel-input" type="text" placeholder="Enter reporter/author name" />
+            </div>
+
+            <div style="grid-column:1/-1;">
+              <label for="rNewsShort">Short Description</label>
+              <textarea id="rNewsShort" class="panel-textarea" placeholder="Short description for preview"></textarea>
+            </div>
+
+            <div style="grid-column:1/-1;">
+              <label for="rNewsContent">Full Content *</label>
+              <textarea id="rNewsContent" class="panel-textarea" placeholder="Full article content..." required></textarea>
+            </div>
+
+            <div style="grid-column:1/-1;">
+              <label for="rNewsTags">Tags (comma separated)</label>
+              <input id="rNewsTags" class="panel-input" type="text" placeholder="politics, pune, breaking" />
+            </div>
+
+            <div class="panel-row" style="grid-column:1/-1;">
+              <label><input id="rNewsFeatured" type="checkbox" /> Featured (Top 6 Boxes)</label>
+              <label><input id="rNewsShowHome" type="checkbox" checked /> Show on Home Page</label>
+            </div>
+
+            <button class="panel-btn green" type="submit">Submit for Review</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="mynews">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">My News Queue</h2>
+          <ul id="myNewsList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="breaking">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Breaking Ticker Suggestion</h2>
+          <form id="reporterBreakingForm">
+            <textarea id="rBreakingText" class="panel-textarea" placeholder="Suggest breaking ticker text"></textarea>
+            <button class="panel-btn red" type="submit" style="margin-top:0.6rem;">Submit Breaking Suggestion</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </section>
+  <script src="/assets/js/panel-suite.js" defer></script>
+</body>
+</html>

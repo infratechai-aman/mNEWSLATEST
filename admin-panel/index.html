@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maithili Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/panel-suite.css" />
+</head>
+<body class="panel-shell" data-panel-app="admin">
+  <section id="adminLoginView" class="panel-login">
+    <div class="panel-login-card">
+      <p class="panel-muted">Maithili News CMS</p>
+      <h1>Admin Login</h1>
+      <p class="panel-muted">Use your Maithili admin credentials.</p>
+      <p id="adminError" class="panel-error panel-hidden"></p>
+      <form id="adminLoginForm">
+        <input id="adminEmail" class="panel-input" type="text" placeholder="Email / Username" style="margin-top:0.5rem;" />
+        <input id="adminPassword" class="panel-input" type="password" placeholder="Password" style="margin-top:0.5rem;" />
+        <button class="panel-btn red" type="submit" style="margin-top:0.7rem; width:100%;">Login</button>
+      </form>
+      <p class="panel-muted" style="margin-top:0.8rem;">Reporter panel: <a href="/reporter-panel/" style="color:#93c5fd;">open</a></p>
+    </div>
+  </section>
+
+  <section id="adminDashView" class="panel-hidden">
+    <header class="panel-top">
+      <div class="row">
+        <div class="panel-brand">Maithili News Admin</div>
+        <div class="panel-row">
+          <a href="/reporter-panel/" class="panel-btn slate" style="text-decoration:none;">Reporter Panel</a>
+          <button id="adminLogout" class="panel-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="panel-page">
+      <div class="panel-head">
+        <div>
+          <h1 class="panel-title">Admin Dashboard</h1>
+          <p class="panel-sub">Welcome back, Maithili Admin</p>
+        </div>
+        <button id="adminRefresh" class="panel-btn panel-refresh" type="button">↻ Refresh</button>
+      </div>
+
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab-btn="overview" data-icon="◧">Overview</button>
+        <button class="panel-tab" data-tab-btn="news" data-icon="▦">News Mgmt</button>
+        <button class="panel-tab" data-tab-btn="ads" data-icon="◫">Advertisements</button>
+        <button class="panel-tab" data-tab-btn="breaking" data-icon="◉">Breaking Ticker</button>
+        <button class="panel-tab" data-tab-btn="business" data-icon="▤">Business Directory</button>
+        <button class="panel-tab" data-tab-btn="classifieds" data-icon="⌖">Classifieds</button>
+        <button class="panel-tab" data-tab-btn="reporters" data-icon="◌">Reporter Panel</button>
+        <button class="panel-tab" data-tab-btn="epaper" data-icon="▣">E-Newspaper</button>
+        <button class="panel-tab" data-tab-btn="livetv" data-icon="◍">Live TV</button>
+        <button class="panel-tab" data-tab-btn="settings" data-icon="⚙">Settings</button>
+      </div>
+
+      <section class="panel-section" data-tab="overview">
+        <div class="panel-grid-4">
+          <article class="panel-stat" data-icon="◷"><span>Pending Items</span><strong id="statPendingItems">0</strong></article>
+          <article class="panel-stat" data-icon="▤"><span>Pending News</span><strong id="statPendingNews">0</strong></article>
+          <article class="panel-stat" data-icon="◌"><span>Pending Reporters</span><strong id="statPendingReporters">0</strong></article>
+          <article class="panel-stat" data-icon="◬"><span>Pending Ads</span><strong id="statPendingAds">0</strong></article>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="news">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">News Management</h2>
+          <form id="newsForm" class="panel-grid-2">
+            <input id="newsTitle" class="panel-input" type="text" placeholder="Headline" />
+            <input id="newsCategory" class="panel-input" type="text" placeholder="Category" />
+            <button class="panel-btn" type="submit">Add News</button>
+          </form>
+          <ul id="newsList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="ads">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Advertisement Management</h2>
+          <div class="panel-row"><label><input id="adHeaderEnabled" type="checkbox" /> Header Ad Enabled</label></div>
+          <input id="adHeaderImage" class="panel-input" type="url" placeholder="Header image URL" style="margin-top:0.5rem;" />
+          <input id="adHeaderLink" class="panel-input" type="url" placeholder="Header destination URL" style="margin-top:0.5rem;" />
+          <div class="panel-row" style="margin-top:0.4rem;"><label><input id="adSidebarEnabled" type="checkbox" /> Sidebar Ads Enabled</label></div>
+          <button id="adsSave" class="panel-btn" type="button" style="margin-top:0.6rem;">Save Ad Settings</button>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="breaking">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Breaking Ticker</h2>
+          <div class="panel-row"><label><input id="breakingEnabled" type="checkbox" /> Enable ticker</label></div>
+          <textarea id="breakingText" class="panel-textarea" placeholder="Custom breaking text" style="margin-top:0.5rem;"></textarea>
+          <div id="breakingNewsPick" class="panel-card" style="margin-top:0.6rem; background:#f8fafc;"></div>
+          <button id="breakingSave" class="panel-btn" type="button" style="margin-top:0.6rem;">Save Breaking Settings</button>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="business">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Business Directory</h2>
+          <form id="businessForm" class="panel-grid-2">
+            <input id="bizName" class="panel-input" type="text" placeholder="Business name" />
+            <input id="bizCategory" class="panel-input" type="text" placeholder="Category" />
+            <input id="bizCity" class="panel-input" type="text" placeholder="City" />
+            <button class="panel-btn green" type="submit">Add Business</button>
+          </form>
+          <ul id="businessList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="classifieds">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Classified Management</h2>
+          <form id="classifiedForm" class="panel-grid-2">
+            <input id="clsTitle" class="panel-input" type="text" placeholder="Classified title" />
+            <input id="clsType" class="panel-input" type="text" placeholder="Type (job/rent/sale)" />
+            <input id="clsContact" class="panel-input" type="text" placeholder="Contact" />
+            <button class="panel-btn" type="submit">Add Classified</button>
+          </form>
+          <ul id="classifiedList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="reporters">
+        <div class="panel-grid-2">
+          <div class="panel-card">
+            <h2 style="margin-top:0;">Reporter Applications</h2>
+            <ul id="reporterApps" class="panel-list"></ul>
+          </div>
+          <div class="panel-card">
+            <h2 style="margin-top:0;">Create Reporter</h2>
+            <form id="createReporterForm">
+              <input id="repName" class="panel-input" type="text" placeholder="Name" />
+              <input id="repEmail" class="panel-input" type="email" placeholder="Email" style="margin-top:0.5rem;" />
+              <input id="repPassword" class="panel-input" type="text" placeholder="Password" style="margin-top:0.5rem;" />
+              <button class="panel-btn green" type="submit" style="margin-top:0.7rem;">Add Reporter</button>
+            </form>
+            <ul id="reporterList" class="panel-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="epaper">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">E-Newspaper</h2>
+          <form id="paperForm" class="panel-grid-2">
+            <input id="paperTitle" class="panel-input" type="text" placeholder="Edition title" />
+            <input id="paperDate" class="panel-input" type="date" />
+            <input id="paperUrl" class="panel-input" type="url" placeholder="PDF URL" />
+            <button class="panel-btn" type="submit">Upload E-Paper</button>
+          </form>
+          <ul id="paperList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="livetv">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Live TV</h2>
+          <div class="panel-row"><label><input id="liveEnabled" type="checkbox" /> Live TV enabled</label><button id="saveLiveToggle" class="panel-btn slate" type="button">Save Toggle</button></div>
+          <form id="liveForm" class="panel-grid-2" style="margin-top:0.5rem;">
+            <input id="liveTitle" class="panel-input" type="text" placeholder="Stream title" />
+            <input id="liveUrl" class="panel-input" type="url" placeholder="YouTube URL" />
+            <label class="panel-row"><input id="liveMark" type="checkbox" /> Mark as live</label>
+            <button class="panel-btn red" type="submit">Add Stream</button>
+          </form>
+          <ul id="liveList" class="panel-list"></ul>
+        </div>
+      </section>
+
+      <section class="panel-section panel-hidden" data-tab="settings">
+        <div class="panel-card">
+          <h2 style="margin-top:0;">Settings</h2>
+          <p class="panel-item-meta">This panel uses only Maithili local data keys. No PMQ/StarNews API keys are used.</p>
+          <button id="clearAllData" class="panel-btn red" type="button">Reset Panel Data</button>
+        </div>
+      </section>
+    </main>
+  </section>
+  <script src="/assets/js/panel-suite.js" defer></script>
+</body>
+</html>
