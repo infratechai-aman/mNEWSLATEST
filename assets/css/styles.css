@@ -1,27 +1,31 @@
 ﻿:root {
-  --primary: #c40000;
-  --secondary: #111111;
-  --bg: #f4f4f5;
+  --primary: #dc2626;
+  --secondary: #1a2744;
+  --bg: #eef1f6;
   --surface: #ffffff;
-  --muted-surface: #ececee;
-  --text: #111111;
-  --text-muted: #5a5a5f;
-  --border: #d9d9df;
-  --accent: #b68a1d;
-  --gradient: linear-gradient(135deg, #c40000 0%, #7e0000 75%);
-  --shadow-soft: 0 10px 28px rgba(17, 17, 17, 0.08);
+  --muted-surface: #e4e8ef;
+  --text: #111827;
+  --text-muted: #4b5563;
+  --border: #cbd5e1;
+  --accent: #2563eb;
+  --gradient: linear-gradient(135deg, #dc2626 0%, #991b1b 75%);
+  --navy: #1a2744;
+  --navy-light: #243352;
+  --shadow-soft: 0 10px 28px rgba(26, 39, 68, 0.10);
   --radius: 14px;
   --container: min(1220px, 92vw);
 }
 
 html[data-theme='dark'] {
-  --bg: #111214;
-  --surface: #17181b;
-  --muted-surface: #22242a;
-  --text: #f7f8fb;
-  --text-muted: #b9bcc7;
-  --border: #2f323a;
-  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --bg: #0f1726;
+  --surface: #162033;
+  --muted-surface: #1e2d47;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #2d3f5e;
+  --navy: #0d1a30;
+  --navy-light: #162033;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
 /* Invert the black-text logo in dark mode for visibility */
@@ -37,7 +41,7 @@ html[data-theme='dark'] .panel-brand img {
 body {
   margin: 0;
   font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top right, rgba(182, 138, 29, 0.09), transparent 30%), var(--bg);
+  background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.06), transparent 30%), var(--bg);
   color: var(--text);
   line-height: 1.65;
 }
@@ -60,7 +64,7 @@ img {
 }
 
 .site-top {
-  background: var(--secondary);
+  background: var(--navy);
   color: #fff;
   font-size: 0.92rem;
 }
@@ -91,18 +95,31 @@ img {
 }
 
 .pill-live {
-  background: rgba(196, 0, 0, 0.24);
-  color: #ffd8d8;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(220, 38, 38, 0.3);
+  color: #fecaca;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .site-header {
   position: sticky;
   top: 0;
   z-index: 80;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--primary);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 .header-wrap {
@@ -360,6 +377,7 @@ img {
   font-size: clamp(1.2rem, 2.5vw, 2rem);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -519,6 +537,7 @@ img {
   border-bottom: 3px solid var(--primary);
   display: inline-block;
   padding-bottom: 0.4rem;
+  color: var(--navy, var(--secondary));
 }
 
 .sidebar-widget {
@@ -556,11 +575,11 @@ img {
 
 .ad-slot {
   border: 1px dashed color-mix(in srgb, var(--accent) 70%, var(--border));
-  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
   border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #7a6426;
+  color: #3b5998;
   font-size: 0.76rem;
   font-weight: 800;
   min-height: 90px;
@@ -585,7 +604,7 @@ img {
 }
 
 .newsletter {
-  background: linear-gradient(135deg, #1a1a1d 0%, #2b0f0f 100%);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   color: #fff;
   padding: 1.1rem;
   border-radius: 12px;
@@ -701,8 +720,17 @@ button.primary {
 
 .site-footer {
   margin-top: 2rem;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
+  border-top: 3px solid var(--primary);
+  background: var(--navy);
+  color: #cbd5e1;
+}
+
+.site-footer a {
+  color: #e2e8f0;
+}
+
+.site-footer a:hover {
+  color: #fff;
 }
 
 .footer-grid {
@@ -715,6 +743,7 @@ button.primary {
 .footer-title {
   font-family: 'Merriweather', Georgia, serif;
   margin: 0 0 0.7rem;
+  color: #fff;
 }
 
 .footer-list {
@@ -725,13 +754,13 @@ button.primary {
 
 .footer-list li {
   margin-bottom: 0.55rem;
-  color: var(--text-muted);
+  color: #94a3b8;
 }
 
 .page-header {
   padding: 1rem;
   border-radius: 14px;
-  background: linear-gradient(130deg, color-mix(in srgb, var(--primary) 88%, #230000), color-mix(in srgb, var(--secondary) 80%, #000));
+  background: linear-gradient(130deg, var(--navy) 0%, var(--navy-light) 60%, var(--primary) 100%);
   color: #fff;
 }
 
@@ -960,11 +989,11 @@ button.primary {
 }
 
 .auth-admin {
-  background: linear-gradient(135deg, #141722 0%, #1f232f 50%, #11141d 100%);
+  background: linear-gradient(135deg, #0f1726 0%, var(--navy) 50%, #0d1a30 100%);
 }
 
 .auth-reporter {
-  background: linear-gradient(135deg, #2160c9 0%, #4c30a6 55%, #2d227f 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #1e40af 100%);
 }
 
 .auth-layout {
@@ -1080,12 +1109,12 @@ button.primary {
   align-items: center;
   gap: 0.8rem;
   padding: 0.9rem 4vw;
-  background: linear-gradient(90deg, #9f1010 0%, #cd1a1a 50%, #9f1010 100%);
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-light) 40%, var(--primary) 100%);
   color: #fff;
 }
 
 .reporter-topbar {
-  background: linear-gradient(90deg, #1f67d9 0%, #315cf4 50%, #1f67d9 100%);
+  background: linear-gradient(90deg, #1e40af 0%, #2563eb 50%, #1e40af 100%);
 }
 
 .dash-brand {
