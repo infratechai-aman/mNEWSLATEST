@@ -421,7 +421,11 @@ function applyBusinessControl(path) {
 function applyDynamicHomeSections(path) {
   if (!path.startsWith('/home/')) return;
   const news = readPanelData('maithili_news', []);
-  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => {
+    const da = new Date(a.createdAt);
+    const db = new Date(b.createdAt);
+    return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
+  });
 
   // Top Stories (3 latest)
   const topStoriesGrid = document.querySelector('.news-grid-3');
@@ -541,14 +545,19 @@ function applyLatestUpdates(path) {
   if (!widget || !widget.querySelector('h3').textContent.includes('Latest Updates')) return;
 
   const news = readPanelData('maithili_news', []);
-  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => {
+    const da = new Date(a.createdAt);
+    const db = new Date(b.createdAt);
+    return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
+  });
   const latest = approved.slice(0, 6);
 
   if (latest.length) {
     const list = widget.querySelector('ul');
     if (list) {
       list.innerHTML = latest.map((n) => {
-        const time = new Date(n.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const d = new Date(n.createdAt);
+        const time = isNaN(d) ? 'Recent' : d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         return `<li>${time}: <a href="/article-page/?id=${encodeURIComponent(n.id)}">${escapeHtml(n.title)}</a></li>`;
       }).join('');
     }
@@ -610,7 +619,7 @@ function wireArticleLinks(path) {
       videoUrl: card.getAttribute('data-video-url') || '',
       shortDescription: summary,
       content: card.getAttribute('data-content') || summary || 'Detailed article will be updated by editorial desk.',
-      createdAt: new Date().toLocaleString('en-IN')
+      createdAt: new Date().toISOString()
     };
     storeStaticArticle(payload);
     if (!card.dataset.boundOpenArticle) {
