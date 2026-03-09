@@ -246,6 +246,9 @@ function applyFrontendControls(path) {
   applyHeroCarousel(path);
   applyTickerControl();
   applyAdsControl();
+  applyLatestUpdates(path);
+  applyDynamicHomeSections(path);
+  applySearchLogic(path);
   applyLiveTvControl(path);
   applyBusinessControl(path);
   applyClassifiedControl(path);
@@ -415,6 +418,101 @@ function applyBusinessControl(path) {
   main.insertBefore(section, main.children[2] || null);
 }
 
+function applyDynamicHomeSections(path) {
+  if (!path.startsWith('/home/')) return;
+  const news = readPanelData('maithili_news', []);
+  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Top Stories (3 latest)
+  const topStoriesGrid = document.querySelector('.news-grid-3');
+  if (topStoriesGrid && approved.length >= 3) {
+    topStoriesGrid.innerHTML = approved.slice(0, 3).map(n => `
+      <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
+        <img src="${safeHttpUrl(n.mainImage || n.thumbnail) || 'https://images.unsplash.com/photo-1555848962-6e79363ec58f'}" alt="${escapeHtml(n.title)}" />
+        <div class="card-content">
+          <h3 class="headline-md">${escapeHtml(n.title)}</h3>
+          <p class="muted">${escapeHtml(n.shortDescription || '')}</p>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // Category Highlights (4 categories)
+  const highlightsGrid = document.querySelector('.news-grid-4');
+  if (highlightsGrid) {
+    const categories = ['Politics', 'World', 'Business', 'Sports'];
+    const highlighted = categories.map(cat => approved.find(n => n.category === cat) || approved.find(n => n.category?.toLowerCase() === cat.toLowerCase())).filter(Boolean);
+    if (highlighted.length >= 2) {
+      highlightsGrid.innerHTML = highlighted.map(n => `
+        <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
+          <div class="card-content">
+            <span class="kicker">${escapeHtml(n.category)}</span>
+            <h3 class="headline-md">${escapeHtml(n.title)}</h3>
+          </div>
+        </article>
+      `).join('');
+    }
+  }
+
+  // Video News
+  const videoGrid = document.querySelectorAll('.news-grid-3')[1];
+  if (videoGrid) {
+    const videos = approved.filter(n => n.videoUrl || n.video_url).slice(0, 3);
+    if (videos.length) {
+      videoGrid.innerHTML = videos.map(v => `
+        <article class="card" data-news-id="${v.id}" data-video-url="${v.videoUrl || v.video_url}" style="cursor:pointer;">
+          <img src="${safeHttpUrl(v.mainImage || v.thumbnail) || 'https://images.unsplash.com/photo-1495020689067-958852a7765e'}" alt="${escapeHtml(v.title)}" />
+          <div class="card-content">
+            <h3 class="headline-md">${escapeHtml(v.title)}</h3>
+          </div>
+        </article>
+      `).join('');
+    }
+  }
+}
+
+function applySearchLogic(path) {
+  if (!path.startsWith('/search/')) return;
+  const form = document.querySelector('.search-bar');
+  const input = form?.querySelector('input');
+  const button = form?.querySelector('button');
+  const resultsGrid = document.querySelector('.news-grid-2');
+  if (!form || !resultsGrid) return;
+
+  function doSearch(query) {
+    if (!query.trim()) return;
+    const news = readPanelData('maithili_news', []);
+    const staticArticles = readPanelData('maithili_static_articles', []);
+    const all = [...news, ...staticArticles];
+    const results = all.filter(n =>
+      (n.title?.toLowerCase().includes(query.toLowerCase())) ||
+      (n.content?.toLowerCase().includes(query.toLowerCase())) ||
+      (n.category?.toLowerCase().includes(query.toLowerCase()))
+    );
+
+    if (results.length) {
+      resultsGrid.innerHTML = results.map(n => `
+        <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
+          <div class="card-content">
+            <span class="kicker">${escapeHtml(n.category || 'News')}</span>
+            <h3 class="headline-md">${escapeHtml(n.title)}</h3>
+            <p class="muted">Published ${n.createdAt || 'recently'}</p>
+          </div>
+        </article>
+      `).join('');
+      wireArticleLinks(path);
+    } else {
+      resultsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem;">No results found for "' + safeHttpUrl(query) + '"</p>';
+    }
+  }
+
+  button.addEventListener('click', () => doSearch(input.value));
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    doSearch(input.value);
+  });
+}
+
 function applyClassifiedControl(path) {
   if (!path.startsWith('/home/') && !path.startsWith('/business/')) return;
   const classifieds = readPanelData('maithili_classifieds', []).filter((c) => c.status === 'approved');
@@ -433,6 +531,28 @@ function applyClassifiedControl(path) {
     </ul>
   `;
   side.prepend(widget);
+}
+
+function applyLatestUpdates(path) {
+  if (!path.startsWith('/home/')) return;
+  const side = document.querySelector('aside');
+  if (!side) return;
+  const widget = side.querySelector('.sidebar-widget');
+  if (!widget || !widget.querySelector('h3').textContent.includes('Latest Updates')) return;
+
+  const news = readPanelData('maithili_news', []);
+  const approved = news.filter((n) => n.status === 'approved').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const latest = approved.slice(0, 6);
+
+  if (latest.length) {
+    const list = widget.querySelector('ul');
+    if (list) {
+      list.innerHTML = latest.map((n) => {
+        const time = new Date(n.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        return `<li>${time}: <a href="/article-page/?id=${encodeURIComponent(n.id)}">${escapeHtml(n.title)}</a></li>`;
+      }).join('');
+    }
+  }
 }
 
 function applyENewspaperControl(path) {
