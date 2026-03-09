@@ -1,4 +1,4 @@
-﻿const routes = [
+const routes = [
   ['Home', '/home/'],
   ['Politics', '/politics/'],
   ['India', '/india/'],
@@ -49,8 +49,9 @@ function escapeHtml(value) {
 }
 
 function safeHttpUrl(url) {
+  if (!url || !String(url).trim()) return '';
   try {
-    const u = new URL(String(url || ''), window.location.origin);
+    const u = new URL(String(url).trim(), window.location.origin);
     if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
   } catch (_) {
     return '';
@@ -60,14 +61,30 @@ function safeHttpUrl(url) {
 
 function ytToEmbed(url) {
   if (!url) return '';
-  if (url.includes('/embed/')) return url;
-  const short = url.match(/youtu\.be\/([^?&]+)/i);
-  if (short) return `https://www.youtube.com/embed/${short[1]}`;
-  const normal = url.match(/[?&]v=([^&]+)/i);
-  if (normal) return `https://www.youtube.com/embed/${normal[1]}`;
-  const live = url.match(/youtube\.com\/live\/([^?&]+)/i);
-  if (live) return `https://www.youtube.com/embed/${live[1]}`;
-  return url;
+  let embedUrl = url;
+  if (url.includes('/embed/')) {
+    embedUrl = url;
+  } else {
+    const short = url.match(/youtu\.be\/([^?&]+)/i);
+    if (short) embedUrl = `https://www.youtube.com/embed/${short[1]}`;
+    else {
+      const normal = url.match(/[?&]v=([^&]+)/i);
+      if (normal) embedUrl = `https://www.youtube.com/embed/${normal[1]}`;
+      else {
+        const live = url.match(/youtube\.com\/live\/([^?&]+)/i);
+        if (live) embedUrl = `https://www.youtube.com/embed/${live[1]}`;
+      }
+    }
+  }
+
+  if (embedUrl !== url || embedUrl.includes('/embed/')) {
+    if (embedUrl.includes('?')) {
+      if (!embedUrl.includes('autoplay=')) embedUrl += '&autoplay=1&mute=1';
+    } else {
+      embedUrl += '?autoplay=1&mute=1';
+    }
+  }
+  return embedUrl;
 }
 
 function normalize(path) {
@@ -113,7 +130,7 @@ function initLayout() {
     <header class="site-header">
       <div class="container header-wrap">
         <button class="nav-toggle" aria-expanded="false" aria-controls="mainNav">Menu</button>
-        <a class="brand" href="/home/">Maithili <span>News</span></a>
+        <a class="brand" href="/home/"><img src="/assets/img/maithili_logo.png" alt="Maithili News Logo" style="height: 45px; width: auto; object-fit: contain; margin: 0; padding: 0;" /></a>
         <nav id="mainNav" class="main-nav" aria-label="Primary">
           ${primaryLinks}
           <div class="mega-wrap">
@@ -226,12 +243,69 @@ function optimizeMediaAndLayout() {
 }
 
 function applyFrontendControls(path) {
+  applyHeroCarousel(path);
   applyTickerControl();
   applyAdsControl();
   applyLiveTvControl(path);
   applyBusinessControl(path);
   applyClassifiedControl(path);
   applyENewspaperControl(path);
+}
+
+function applyHeroCarousel(path) {
+  if (!path.startsWith('/home/')) return;
+  const track = document.getElementById('carouselTrack');
+  const dotsWrap = document.getElementById('carouselDots');
+  const prevBtn = document.getElementById('carouselPrev');
+  const nextBtn = document.getElementById('carouselNext');
+  if (!track || !dotsWrap) return;
+
+  const news = readPanelData('maithili_news', []);
+  const featured = news.filter((n) => n.status === 'approved' && n.featured);
+
+  const fallbackSlides = [
+    { title: 'Bihar and India policy shifts redraw development priorities across key sectors', category: 'Main Headline', shortDescription: 'Detailed coverage from Patna and New Delhi with live inputs from bureaus, agencies, and field reporters.', mainImage: 'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?q=80&w=1200&auto=format&fit=crop' },
+    { title: 'Parliament debate heats up over federal finance reforms', category: 'Politics', shortDescription: 'Opposition and treasury benches clash over implementation timelines.', mainImage: 'https://images.unsplash.com/photo-1555848962-6e79363ec58f?q=80&w=1200&auto=format&fit=crop' },
+    { title: 'India infrastructure projects accelerate in tier-2 cities', category: 'India', shortDescription: 'New highway and rail corridors to impact regional growth patterns.', mainImage: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1200&auto=format&fit=crop' },
+    { title: 'Tech sector watches AI regulations after policy consultation', category: 'Technology', shortDescription: 'Founders seek clarity on compliance and innovation safeguards.', mainImage: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop' }
+  ];
+
+  const slides = featured.length >= 2 ? featured : fallbackSlides;
+
+  track.innerHTML = slides.map((s) => {
+    const img = safeHttpUrl(s.mainImage || s.thumbnail || '') || 'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?q=80&w=1200&auto=format&fit=crop';
+    const id = s.id ? `onclick="window.location.href='/article-page/?id=${encodeURIComponent(s.id)}'" style="cursor:pointer;"` : '';
+    return `
+      <article class="carousel-slide hero-story" ${id}>
+        <img src="${img}" alt="${escapeHtml(s.title)}" />
+        <div class="story-content">
+          <span class="kicker">${escapeHtml(s.category || 'Featured')}</span>
+          <h2 class="headline-xl">${escapeHtml(s.title)}</h2>
+          <p class="muted">${escapeHtml(s.shortDescription || '')}</p>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  dotsWrap.innerHTML = slides.map((_, i) => `<button class="carousel-dot${i === 0 ? ' active' : ''}" data-slide="${i}" aria-label="Go to slide ${i + 1}"></button>`).join('');
+
+  let current = 0;
+  const total = slides.length;
+
+  function goTo(index) {
+    current = ((index % total) + total) % total;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', () => { goTo(current - 1); resetTimer(); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { goTo(current + 1); resetTimer(); });
+  dotsWrap.addEventListener('click', (e) => {
+    if (e.target.dataset.slide !== undefined) { goTo(+e.target.dataset.slide); resetTimer(); }
+  });
+
+  let timer = setInterval(() => goTo(current + 1), 5000);
+  function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(current + 1), 5000); }
 }
 
 function applyTickerControl() {
@@ -259,28 +333,38 @@ function applyTickerControl() {
 }
 
 function applyAdsControl() {
-  const ads = readPanelData('maithili_ads', { headerEnabled: true, headerImage: '', headerLink: '#', sidebarEnabled: true });
+  const ads = readPanelData('maithili_ads', {
+    headerEnabled: true, headerImage: '', headerLink: '#',
+    sidebarEnabled: true, sidebarImage: '', sidebarLink: '#',
+    sidebar2Enabled: true, sidebar2Image: '', sidebar2Link: '#',
+    footerEnabled: true, footerImage: '', footerLink: '#'
+  });
   const slots = [...document.querySelectorAll('.ad-slot')];
   slots.forEach((slot) => {
     const text = (slot.textContent || '').toLowerCase();
-    const isSidebar = text.includes('sidebar');
     const isTop = text.includes('top') || text.includes('leaderboard') || text.includes('header');
+    const isSidebar300 = text.includes('300');
+    const isSidebar = !isSidebar300 && text.includes('sidebar');
     const isFooter = text.includes('footer');
 
-    if ((isTop && !ads.headerEnabled) || (isSidebar && !ads.sidebarEnabled)) {
-      slot.style.display = 'none';
-      return;
-    }
+    // Determine which config applies
+    let enabled, image, link;
+    if (isTop) { enabled = ads.headerEnabled; image = ads.headerImage; link = ads.headerLink; }
+    else if (isSidebar300) { enabled = ads.sidebar2Enabled; image = ads.sidebar2Image; link = ads.sidebar2Link; }
+    else if (isSidebar) { enabled = ads.sidebarEnabled; image = ads.sidebarImage; link = ads.sidebarLink; }
+    else if (isFooter) { enabled = ads.footerEnabled; image = ads.footerImage; link = ads.footerLink; }
+    else return;
+
+    if (!enabled) { slot.style.display = 'none'; return; }
     slot.style.display = '';
 
-    if (isTop && ads.headerImage) {
-      const link = ads.headerLink || '#';
-      slot.innerHTML = `<a href="${link}" target="_blank" rel="noopener"><img src="${ads.headerImage}" alt="Header Advertisement" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;"></a>`;
-    } else if (isFooter && ads.headerImage) {
-      slot.innerHTML = `<a href="${ads.headerLink || '#'}" target="_blank" rel="noopener"><img src="${ads.headerImage}" alt="Footer Advertisement" style="width:100%;max-height:120px;object-fit:cover;border-radius:10px;"></a>`;
+    if (image) {
+      const maxH = isTop ? '140px' : isFooter ? '120px' : '250px';
+      slot.innerHTML = `<a href="${link || '#'}" target="_blank" rel="noopener"><img src="${image}" alt="Advertisement" style="width:100%;max-height:${maxH};object-fit:cover;border-radius:10px;"></a>`;
     }
   });
 }
+
 
 function applyLiveTvControl(path) {
   if (!path.startsWith('/live-tv/')) return;
@@ -305,7 +389,7 @@ function applyLiveTvControl(path) {
 }
 
 function applyBusinessControl(path) {
-  if (!path.startsWith('/business/')) return;
+  if (!path.startsWith('/business/') && !path.startsWith('/home/')) return;
   const businesses = readPanelData('maithili_businesses', []).filter((b) => b.status === 'approved');
   if (!businesses.length) return;
   const main = document.querySelector('.split > div');
@@ -400,10 +484,12 @@ function wireArticleLinks(path) {
       id,
       title,
       category: firstText(card, '.kicker') || 'News',
-      author: 'Maithili Desk',
+      author: card.getAttribute('data-author') || 'Maithili Desk',
       mainImage: img?.getAttribute('src') || '',
+      secondImage: card.getAttribute('data-second-image') || '',
+      videoUrl: card.getAttribute('data-video-url') || '',
       shortDescription: summary,
-      content: summary || 'Detailed article will be updated by editorial desk.',
+      content: card.getAttribute('data-content') || summary || 'Detailed article will be updated by editorial desk.',
       createdAt: new Date().toLocaleString('en-IN')
     };
     storeStaticArticle(payload);
@@ -466,12 +552,12 @@ function renderArticlePage(path) {
           <span>${safeCreatedAt}</span>
           <span>${safeCategory}</span>
         </div>
-        ${(videoEmbed ? `<iframe class="video-embed" style="margin:1rem 0;" src="${videoEmbed}" title="${safeTitle}" allowfullscreen></iframe>` : '')}
+        ${(videoEmbed ? `<iframe class="video-embed" style="margin:1rem 0;" src="${videoEmbed}" title="${safeTitle}" allow="autoplay; fullscreen" allowfullscreen></iframe>` : '')}
         ${(!videoEmbed && safeMainImage ? `<img src="${safeMainImage}" alt="${safeTitle}" style="margin:1rem 0;" />` : '')}
         ${(safeShortDescription ? `<blockquote style="margin:0.8rem 0; padding:0.8rem 1rem; border-left:4px solid #dc2626; background:#f8fafc; border-radius:10px;"><strong>${safeShortDescription}</strong></blockquote>` : '')}
         ${htmlParagraphs || '<p>No detailed content available.</p>'}
         ${(safeSecondImage ? `<img src="${safeSecondImage}" alt="Related visual" style="margin:1rem 0;" />` : '')}
-        ${(tags.length ? `<div>${tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join('')}</div>` : '')}
+
       </article>
       <aside class="grid">
         <div class="sidebar-widget">
@@ -524,10 +610,16 @@ function wireShell() {
   const savedLang = localStorage.getItem('lang') || 'en';
   if (lang) {
     lang.value = savedLang;
-    weather.textContent = weatherByLang[savedLang];
+    weather.textContent = weatherByLang[savedLang] || weatherByLang['en'];
     lang.addEventListener('change', () => {
       localStorage.setItem('lang', lang.value);
-      weather.textContent = weatherByLang[lang.value];
+      if (weather) weather.textContent = weatherByLang[lang.value] || weatherByLang['en'];
+
+      const gtSelect = document.querySelector('.goog-te-combo');
+      if (gtSelect) {
+        gtSelect.value = lang.value;
+        gtSelect.dispatchEvent(new Event('change'));
+      }
     });
   }
 
@@ -556,4 +648,38 @@ function initLightbox() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initLayout);
+function injectGoogleTranslate() {
+  if (document.getElementById('google_translate_element')) return;
+  const div = document.createElement('div');
+  div.id = 'google_translate_element';
+  div.style.display = 'none';
+  document.body.appendChild(div);
+
+  window.googleTranslateElementInit = function () {
+    new window.google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'en,hi,mai',
+      autoDisplay: false
+    }, 'google_translate_element');
+
+    setTimeout(() => {
+      const savedLang = localStorage.getItem('lang') || 'en';
+      if (savedLang !== 'en') {
+        const gtSelect = document.querySelector('.goog-te-combo');
+        if (gtSelect) {
+          gtSelect.value = savedLang;
+          gtSelect.dispatchEvent(new Event('change'));
+        }
+      }
+    }, 1000);
+  };
+
+  const script = document.createElement('script');
+  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  document.body.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initLayout();
+  injectGoogleTranslate();
+});

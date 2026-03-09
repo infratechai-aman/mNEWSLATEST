@@ -1,14 +1,18 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Maithili Reporter Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/panel-suite.css" />
 </head>
+
 <body class="panel-shell" data-panel-app="reporter">
   <section id="reporterLoginView" class="panel-login">
     <div class="panel-login-card">
@@ -17,8 +21,10 @@
       <p class="panel-muted">Login with reporter account approved by admin.</p>
       <p id="reporterError" class="panel-error panel-hidden"></p>
       <form id="reporterLoginForm">
-        <input id="reporterEmail" class="panel-input" type="email" placeholder="Reporter email" style="margin-top:0.5rem;" />
-        <input id="reporterPassword" class="panel-input" type="password" placeholder="Password" style="margin-top:0.5rem;" />
+        <input id="reporterEmail" class="panel-input" type="email" placeholder="Reporter email"
+          style="margin-top:0.5rem;" />
+        <input id="reporterPassword" class="panel-input" type="password" placeholder="Password"
+          style="margin-top:0.5rem;" />
         <button class="panel-btn" type="submit" style="margin-top:0.7rem; width:100%;">Login</button>
       </form>
       <div class="panel-card" style="margin-top:0.8rem; background:#111827; border-color:#334155;">
@@ -27,18 +33,22 @@
           <input id="applyName" class="panel-input" type="text" placeholder="Full name" />
           <input id="applyEmail" class="panel-input" type="email" placeholder="Email" style="margin-top:0.45rem;" />
           <input id="applyPhone" class="panel-input" type="text" placeholder="Phone" style="margin-top:0.45rem;" />
-          <input id="applyPassword" class="panel-input" type="password" placeholder="Choose password" style="margin-top:0.45rem;" />
+          <input id="applyPassword" class="panel-input" type="password" placeholder="Choose password"
+            style="margin-top:0.45rem;" />
           <button class="panel-btn green" type="submit" style="margin-top:0.6rem;">Submit Application</button>
         </form>
       </div>
-      <p class="panel-muted" style="margin-top:0.8rem;">Admin panel: <a href="/admin-panel/" style="color:#93c5fd;">open</a></p>
+      <p class="panel-muted" style="margin-top:0.8rem;">Admin panel: <a href="/admin-panel/"
+          style="color:#93c5fd;">open</a></p>
     </div>
   </section>
 
   <section id="reporterDashView" class="panel-hidden">
     <header class="panel-top">
       <div class="row">
-        <div class="panel-brand">Maithili Reporter Panel</div>
+        <div class="panel-brand" style="display:flex; align-items:center; gap:0.5rem;"><img
+            src="/assets/img/maithili_logo.png" alt="Logo" style="height:35px; width:auto;" /> <span
+            style="font-size:0.85em; opacity:0.9;">Reporter</span></div>
         <div class="panel-row">
           <a href="/admin-panel/" class="panel-btn slate" style="text-decoration:none;">Admin Panel</a>
           <button id="reporterLogout" class="panel-btn">Logout</button>
@@ -66,8 +76,10 @@
         <div class="panel-grid-4">
           <article class="panel-stat" data-icon="▤"><span>My News</span><strong id="myNewsCount">0</strong></article>
           <article class="panel-stat" data-icon="◷"><span>Pending</span><strong id="myPendingCount">0</strong></article>
-          <article class="panel-stat" data-icon="✓"><span>Published</span><strong id="myPublishedCount">0</strong></article>
-          <article class="panel-stat" data-icon="◌"><span>Role</span><strong style="font-size:1.1rem;">Reporter</strong></article>
+          <article class="panel-stat" data-icon="✓"><span>Published</span><strong id="myPublishedCount">0</strong>
+          </article>
+          <article class="panel-stat" data-icon="◌"><span>Role</span><strong style="font-size:1.1rem;">Reporter</strong>
+          </article>
         </div>
       </section>
 
@@ -129,7 +141,8 @@
 
             <div style="grid-column:1/-1;">
               <label for="rNewsContent">Full Content *</label>
-              <textarea id="rNewsContent" class="panel-textarea" placeholder="Full article content..." required></textarea>
+              <textarea id="rNewsContent" class="panel-textarea" placeholder="Full article content..."
+                required></textarea>
             </div>
 
             <div style="grid-column:1/-1;">
@@ -167,4 +180,5 @@
   </section>
   <script src="/assets/js/panel-suite.js" defer></script>
 </body>
+
 </html>

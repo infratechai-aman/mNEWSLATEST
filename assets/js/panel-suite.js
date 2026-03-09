@@ -157,6 +157,14 @@
       root.querySelector("#adHeaderImage").value = ads.headerImage || "";
       root.querySelector("#adHeaderLink").value = ads.headerLink || "#";
       root.querySelector("#adSidebarEnabled").checked = !!ads.sidebarEnabled;
+      root.querySelector("#adSidebarImage").value = ads.sidebarImage || "";
+      root.querySelector("#adSidebarLink").value = ads.sidebarLink || "#";
+      root.querySelector("#adSidebar2Enabled").checked = !!ads.sidebar2Enabled;
+      root.querySelector("#adSidebar2Image").value = ads.sidebar2Image || "";
+      root.querySelector("#adSidebar2Link").value = ads.sidebar2Link || "#";
+      root.querySelector("#adFooterEnabled").checked = !!ads.footerEnabled;
+      root.querySelector("#adFooterImage").value = ads.footerImage || "";
+      root.querySelector("#adFooterLink").value = ads.footerLink || "#";
 
       root.querySelector("#businessList").innerHTML = businesses.map((b) => `
         <li>
@@ -281,7 +289,15 @@
         headerEnabled: root.querySelector("#adHeaderEnabled").checked,
         headerImage: root.querySelector("#adHeaderImage").value.trim(),
         headerLink: root.querySelector("#adHeaderLink").value.trim(),
-        sidebarEnabled: root.querySelector("#adSidebarEnabled").checked
+        sidebarEnabled: root.querySelector("#adSidebarEnabled").checked,
+        sidebarImage: root.querySelector("#adSidebarImage").value.trim(),
+        sidebarLink: root.querySelector("#adSidebarLink").value.trim(),
+        sidebar2Enabled: root.querySelector("#adSidebar2Enabled").checked,
+        sidebar2Image: root.querySelector("#adSidebar2Image").value.trim(),
+        sidebar2Link: root.querySelector("#adSidebar2Link").value.trim(),
+        footerEnabled: root.querySelector("#adFooterEnabled").checked,
+        footerImage: root.querySelector("#adFooterImage").value.trim(),
+        footerLink: root.querySelector("#adFooterLink").value.trim()
       });
       renderAdmin();
     });
