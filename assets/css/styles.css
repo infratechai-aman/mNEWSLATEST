@@ -256,9 +256,9 @@ img {
   position: sticky;
   top: 71px;
   z-index: 70;
-  background: var(--gradient);
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-light) 70%, var(--primary) 100%);
   color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 2px solid var(--primary);
 }
 
 .breaking-wrap {
@@ -275,8 +275,9 @@ img {
   font-weight: 900;
   padding: 0.27rem 0.55rem;
   border-radius: 4px;
-  color: var(--primary);
-  background: #fff;
+  color: #fff;
+  background: var(--primary);
+  animation: pulse-live 1.5s ease-in-out infinite;
 }
 
 .ticker {
@@ -335,6 +336,34 @@ img {
 
 .story-content {
   padding: 1.1rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(26, 39, 68, 0.03) 100%);
+}
+
+.story-content .headline-xl {
+  color: #fff;
+}
+
+.hero-story {
+  position: relative;
+}
+
+.hero-story .story-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(26, 39, 68, 0.92) 0%, rgba(26, 39, 68, 0.6) 60%, transparent 100%);
+  color: #fff;
+  padding: 2rem 1.1rem 1.1rem;
+}
+
+.hero-story .story-content .kicker {
+  color: #fecaca;
+  background: rgba(220, 38, 38, 0.4);
+}
+
+.hero-story .story-content .muted {
+  color: #cbd5e1;
 }
 
 /* ── Hero Carousel ── */
@@ -446,6 +475,9 @@ img {
   letter-spacing: 0.08em;
   color: var(--primary);
   font-weight: 800;
+  background: rgba(220, 38, 38, 0.08);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
 }
 
 .headline-xl,
@@ -454,6 +486,7 @@ img {
   font-family: 'Merriweather', Georgia, serif;
   margin: 0.35rem 0;
   line-height: 1.2;
+  color: var(--navy, #1a2744);
 }
 
 .headline-xl {
@@ -468,6 +501,12 @@ img {
   font-size: clamp(1.1rem, 1.8vw, 1.4rem);
 }
 
+html[data-theme='dark'] .headline-xl,
+html[data-theme='dark'] .headline-lg,
+html[data-theme='dark'] .headline-md {
+  color: #e2e8f0;
+}
+
 .muted {
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -479,11 +518,13 @@ img {
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-top: 3px solid var(--accent, #2563eb);
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 8px 24px rgba(26, 39, 68, 0.15);
+  border-top-color: var(--primary);
 }
 
 .card-content {
@@ -534,10 +575,16 @@ img {
   margin: 0;
   font-family: 'Merriweather', Georgia, serif;
   font-size: 1.35rem;
-  border-bottom: 3px solid var(--primary);
+  border-bottom: 3px solid var(--accent, #2563eb);
   display: inline-block;
   padding-bottom: 0.4rem;
   color: var(--navy, var(--secondary));
+}
+
+/* Alternating red accent on even section titles */
+.split>div>.section-title:nth-of-type(even) h2,
+section:nth-of-type(even)>.section-title h2 {
+  border-bottom-color: var(--primary);
 }
 
 .sidebar-widget {
@@ -545,6 +592,15 @@ img {
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
+  border-left: 4px solid var(--accent, #2563eb);
+}
+
+.sidebar-widget .headline-md {
+  color: var(--accent, #2563eb);
+}
+
+html[data-theme='dark'] .sidebar-widget .headline-md {
+  color: #60a5fa;
 }
 
 .list {
