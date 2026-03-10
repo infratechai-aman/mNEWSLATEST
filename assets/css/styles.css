@@ -77,6 +77,25 @@ img {
   align-items: center;
 }
 
+.social-icons {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.social-icons a:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
 .top-meta {
   display: flex;
   gap: 1rem;
