@@ -27,14 +27,17 @@
         { id: uid("news"), title: "Education budget hearing starts", category: "India", status: "pending", author: "Desk", featured: false, createdAt: nowDate() }
       ]);
     }
-    if (!await read("maithili_ads")) await write("maithili_ads", {
-      headerEnabled: true, headerSlides: [
-        { image: "https://picsum.photos/seed/ad1/1200/200", link: "https://example.com/ad1" },
-        { image: "https://picsum.photos/seed/ad2/1200/200", link: "https://example.com/ad2" },
-        { image: "https://picsum.photos/seed/ad3/1200/200", link: "https://example.com/ad3" },
-        { image: "https://picsum.photos/seed/ad4/1200/200", link: "https://example.com/ad4" }
-      ], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#"
-    });
+    let adsData = await read("maithili_ads");
+    if (!adsData || !adsData.headerSlides) {
+      await write("maithili_ads", {
+        headerEnabled: true, headerSlides: [
+          { image: "https://picsum.photos/seed/ad1/1200/200", link: "https://example.com/ad1" },
+          { image: "https://picsum.photos/seed/ad2/1200/200", link: "https://example.com/ad2" },
+          { image: "https://picsum.photos/seed/ad3/1200/200", link: "https://example.com/ad3" },
+          { image: "https://picsum.photos/seed/ad4/1200/200", link: "https://example.com/ad4" }
+        ], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#"
+      });
+    }
     if (!await read("maithili_breaking")) await write("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
     if (!await read("maithili_businesses")) await write("maithili_businesses", []);
     if (!await read("maithili_classifieds")) await write("maithili_classifieds", []);
@@ -407,12 +410,26 @@
     });
 
     root.querySelector("#clearAllData").addEventListener("click", async () => {
-      [
+      const keys = [
         "maithili_news", "maithili_ads", "maithili_breaking", "maithili_businesses", "maithili_classifieds",
         "maithili_reporters", "maithili_reporter_apps", "maithili_enewspapers", "maithili_live_tv"
-      ].forEach((k) => localStorage.removeItem(k));
+      ];
+      keys.forEach((k) => localStorage.removeItem(k));
+      if (typeof window.dbClearCache === 'function') window.dbClearCache();
+
+      // Force rewrite core things the user expects reset
+      await write("maithili_ads", {
+        headerEnabled: true, headerSlides: [
+          { image: "https://picsum.photos/seed/ad1/1200/200", link: "https://example.com/ad1" },
+          { image: "https://picsum.photos/seed/ad2/1200/200", link: "https://example.com/ad2" },
+          { image: "https://picsum.photos/seed/ad3/1200/200", link: "https://example.com/ad3" },
+          { image: "https://picsum.photos/seed/ad4/1200/200", link: "https://example.com/ad4" }
+        ], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#"
+      });
+
       await seed();
       await renderAdmin();
+      alert('Panel data has been reset across the entire database.');
     });
   }
 
