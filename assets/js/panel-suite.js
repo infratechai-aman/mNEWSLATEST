@@ -66,7 +66,6 @@
   }
 
   async function adminInit(root) {
-    await seed();
     const loginView = root.querySelector("#adminLoginView");
     const dashView = root.querySelector("#adminDashView");
     const err = root.querySelector("#adminError");
@@ -83,7 +82,10 @@
     }
 
     const session = await read("maithili_admin_session");
-    if (session && session.role === "admin") await showDashboard();
+    if (session && session.role === "admin") {
+      await seed();
+      await showDashboard();
+    }
 
     root.querySelector("#adminLoginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -99,6 +101,7 @@
         if (window.initFirebase) await window.initFirebase();
         await firebase.auth().signInWithEmailAndPassword(email, pass);
         await write("maithili_admin_session", { role: "admin", email, at: Date.now() });
+        await seed();
         await showDashboard();
       } catch (error) {
         err.textContent = error.message.replace('Firebase:', '').trim();
@@ -434,7 +437,6 @@
   }
 
   async function reporterInit(root) {
-    await seed();
     const loginView = root.querySelector("#reporterLoginView");
     const dashView = root.querySelector("#reporterDashView");
     const err = root.querySelector("#reporterError");
@@ -451,7 +453,10 @@
     }
 
     const session = await read("maithili_reporter_session");
-    if (session && session.role === "reporter") await showDash();
+    if (session && session.role === "reporter") {
+      await seed();
+      await showDash();
+    }
 
     root.querySelector("#reporterLoginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
