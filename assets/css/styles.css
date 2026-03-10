@@ -311,7 +311,7 @@ img {
   gap: 3rem;
   white-space: nowrap;
   will-change: transform;
-  animation: ticker 25s linear infinite;
+  animation: ticker 17s linear infinite;
 }
 
 @keyframes ticker {
