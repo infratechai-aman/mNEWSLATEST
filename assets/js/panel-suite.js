@@ -479,7 +479,7 @@
       const sessionData = await read("maithili_reporter_session", {});
       const reporterName = sessionData.name || "Reporter";
       root.querySelector("#reporterWelcome").textContent = `Welcome, ${reporterName}`;
-      const news = await read("maithili_news", []).filter((n) =>
+      const news = (await read("maithili_news", [])).filter((n) =>
         n.ownerEmail === sessionData.email ||
         n.author === reporterName ||
         n.author === sessionData.email ||

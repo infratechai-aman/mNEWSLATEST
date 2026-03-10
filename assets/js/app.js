@@ -471,7 +471,7 @@ async function applyLiveTvControl(path) {
 
 async function applyBusinessControl(path) {
   if (!path.startsWith('/business/') && !path.startsWith('/home/')) return;
-  const businesses = await readPanelData('maithili_businesses', []).filter((b) => b.status === 'approved');
+  const businesses = (await readPanelData('maithili_businesses', [])).filter((b) => b.status === 'approved');
   if (!businesses.length) return;
   const main = document.querySelector('.split > div');
   if (!main) return;
@@ -597,7 +597,7 @@ async function applySearchLogic(path) {
 
 async function applyClassifiedControl(path) {
   if (!path.startsWith('/home/') && !path.startsWith('/business/')) return;
-  const classifieds = await readPanelData('maithili_classifieds', []).filter((c) => c.status === 'approved');
+  const classifieds = (await readPanelData('maithili_classifieds', [])).filter((c) => c.status === 'approved');
   if (!classifieds.length) return;
   const side = document.querySelector('.split aside') || document.querySelector('.grid');
   if (!side) return;
