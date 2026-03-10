@@ -53,11 +53,12 @@
             try {
                 await loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
                 await loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js');
+                await loadScript('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js');
                 if (!firebase.apps.length) {
                     firebase.initializeApp(FIREBASE_CONFIG);
                 }
                 db = firebase.firestore();
-                console.log('[Firebase] Connected to Firestore');
+                console.log('[Firebase] Connected to Firestore and Auth');
                 return db;
             } catch (err) {
                 console.warn('[Firebase] Failed to init, falling back to localStorage:', err);

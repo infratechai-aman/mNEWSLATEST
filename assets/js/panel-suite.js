@@ -92,19 +92,23 @@
         err.classList.remove("panel-hidden");
         return;
       }
-      const admins = await read("maithili_admin_users", []);
-      const valid = admins.find((a) => String(a.email || '').toLowerCase() === email.toLowerCase() && a.password === pass);
-      if (!valid) {
-        err.textContent = "Invalid admin credentials.";
+      try {
+        if (window.initFirebase) await window.initFirebase();
+        await firebase.auth().signInWithEmailAndPassword(email, pass);
+        await write("maithili_admin_session", { role: "admin", email, at: Date.now() });
+        await showDashboard();
+      } catch (error) {
+        err.textContent = error.message.replace('Firebase:', '').trim();
         err.classList.remove("panel-hidden");
-        return;
       }
-      await write("maithili_admin_session", { role: "admin", email, at: Date.now() });
-      await showDashboard();
     });
 
     root.querySelector("#adminLogout").addEventListener("click", async () => {
       localStorage.removeItem("maithili_admin_session");
+      try {
+        if (window.initFirebase) await window.initFirebase();
+        await firebase.auth().signOut();
+      } catch (e) { }
       showLogin();
     });
     root.querySelector("#adminRefresh")?.addEventListener("click", async () => window.location.reload());
