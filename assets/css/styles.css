@@ -340,6 +340,65 @@ img {
   }
 }
 
+/* ── Header Ad Carousel ── */
+.header-ad-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.header-ad-carousel:active {
+  cursor: grabbing;
+}
+
+.header-ad-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  will-change: transform;
+}
+
+.header-ad-slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+}
+
+.header-ad-slide img {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+}
+
+.header-ad-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.header-ad-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.25s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header-ad-dot.active {
+  background: #fff;
+}
+
 .page-main {
   padding: 1rem 0 2.2rem;
 }

@@ -27,7 +27,7 @@
         { id: uid("news"), title: "Education budget hearing starts", category: "India", status: "pending", author: "Desk", featured: false, createdAt: nowDate() }
       ]);
     }
-    if (!read("maithili_ads")) write("maithili_ads", { headerEnabled: true, headerImage: "", headerLink: "#", sidebarEnabled: true });
+    if (!read("maithili_ads")) write("maithili_ads", { headerEnabled: true, headerSlides: [], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#" });
     if (!read("maithili_breaking")) write("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
     if (!read("maithili_businesses")) write("maithili_businesses", []);
     if (!read("maithili_classifieds")) write("maithili_classifieds", []);
@@ -154,8 +154,14 @@
       `).join("") || "<p class='panel-item-meta'>No approved news available.</p>";
 
       root.querySelector("#adHeaderEnabled").checked = !!ads.headerEnabled;
-      root.querySelector("#adHeaderImage").value = ads.headerImage || "";
-      root.querySelector("#adHeaderLink").value = ads.headerLink || "#";
+      const slides = ads.headerSlides || [];
+      for (let i = 1; i <= 4; i++) {
+        const s = slides[i - 1] || {};
+        const imgEl = root.querySelector(`#adSlide${i}Image`);
+        const linkEl = root.querySelector(`#adSlide${i}Link`);
+        if (imgEl) imgEl.value = s.image || "";
+        if (linkEl) linkEl.value = s.link || "#";
+      }
       root.querySelector("#adSidebarEnabled").checked = !!ads.sidebarEnabled;
       root.querySelector("#adSidebarImage").value = ads.sidebarImage || "";
       root.querySelector("#adSidebarLink").value = ads.sidebarLink || "#";
@@ -285,10 +291,15 @@
     });
 
     root.querySelector("#adsSave").addEventListener("click", () => {
+      const headerSlides = [];
+      for (let i = 1; i <= 4; i++) {
+        const img = (root.querySelector(`#adSlide${i}Image`)?.value || "").trim();
+        const lnk = (root.querySelector(`#adSlide${i}Link`)?.value || "#").trim();
+        headerSlides.push({ image: img, link: lnk });
+      }
       write("maithili_ads", {
         headerEnabled: root.querySelector("#adHeaderEnabled").checked,
-        headerImage: root.querySelector("#adHeaderImage").value.trim(),
-        headerLink: root.querySelector("#adHeaderLink").value.trim(),
+        headerSlides,
         sidebarEnabled: root.querySelector("#adSidebarEnabled").checked,
         sidebarImage: root.querySelector("#adSidebarImage").value.trim(),
         sidebarLink: root.querySelector("#adSidebarLink").value.trim(),

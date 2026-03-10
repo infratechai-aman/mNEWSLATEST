@@ -338,11 +338,18 @@ function applyTickerControl() {
 
 function applyAdsControl() {
   const ads = readPanelData('maithili_ads', {
-    headerEnabled: true, headerImage: '', headerLink: '#',
+    headerEnabled: true, headerSlides: [],
     sidebarEnabled: true, sidebarImage: '', sidebarLink: '#',
     sidebar2Enabled: true, sidebar2Image: '', sidebar2Link: '#',
     footerEnabled: true, footerImage: '', footerLink: '#'
   });
+
+  // Backward compat: if old single headerImage exists, convert it
+  let headerSlides = ads.headerSlides || [];
+  if (!headerSlides.length && ads.headerImage) {
+    headerSlides = [{ image: ads.headerImage, link: ads.headerLink || '#' }];
+  }
+
   const slots = [...document.querySelectorAll('.ad-slot')];
   slots.forEach((slot) => {
     const text = (slot.textContent || '').toLowerCase();
@@ -351,22 +358,89 @@ function applyAdsControl() {
     const isSidebar = !isSidebar300 && text.includes('sidebar');
     const isFooter = text.includes('footer');
 
-    // Determine which config applies
+    if (isTop) {
+      // --- Header Ad Carousel ---
+      if (!ads.headerEnabled) { slot.style.display = 'none'; return; }
+      slot.style.display = '';
+      const validSlides = headerSlides.filter(s => s && s.image);
+      if (!validSlides.length) return;
+
+      slot.innerHTML = `
+        <div class="header-ad-carousel" id="headerAdCarousel">
+          <div class="header-ad-track">
+            ${validSlides.map((s, i) => `
+              <div class="header-ad-slide ${i === 0 ? 'active' : ''}">
+                <a href="${s.link || '#'}" target="_blank" rel="noopener">
+                  <img src="${s.image}" alt="Advertisement ${i + 1}">
+                </a>
+              </div>
+            `).join('')}
+          </div>
+          ${validSlides.length > 1 ? `
+            <div class="header-ad-dots">
+              ${validSlides.map((_, i) => `<button class="header-ad-dot ${i === 0 ? 'active' : ''}" data-slide="${i}" aria-label="Slide ${i + 1}"></button>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      if (validSlides.length > 1) initHeaderAdCarousel(slot.querySelector('#headerAdCarousel'), validSlides.length);
+      return;
+    }
+
+    // Non-header slots (sidebar, footer) — unchanged
     let enabled, image, link;
-    if (isTop) { enabled = ads.headerEnabled; image = ads.headerImage; link = ads.headerLink; }
-    else if (isSidebar300) { enabled = ads.sidebar2Enabled; image = ads.sidebar2Image; link = ads.sidebar2Link; }
+    if (isSidebar300) { enabled = ads.sidebar2Enabled; image = ads.sidebar2Image; link = ads.sidebar2Link; }
     else if (isSidebar) { enabled = ads.sidebarEnabled; image = ads.sidebarImage; link = ads.sidebarLink; }
     else if (isFooter) { enabled = ads.footerEnabled; image = ads.footerImage; link = ads.footerLink; }
     else return;
 
     if (!enabled) { slot.style.display = 'none'; return; }
     slot.style.display = '';
-
     if (image) {
-      const maxH = isTop ? '140px' : isFooter ? '120px' : '250px';
+      const maxH = isFooter ? '120px' : '250px';
       slot.innerHTML = `<a href="${link || '#'}" target="_blank" rel="noopener"><img src="${image}" alt="Advertisement" style="width:100%;max-height:${maxH};object-fit:cover;border-radius:10px;"></a>`;
     }
   });
+}
+
+function initHeaderAdCarousel(carousel, count) {
+  let current = 0;
+  let autoTimer;
+  const track = carousel.querySelector('.header-ad-track');
+  const dots = [...carousel.querySelectorAll('.header-ad-dot')];
+  const slides = [...carousel.querySelectorAll('.header-ad-slide')];
+
+  function goTo(idx) {
+    current = ((idx % count) + count) % count;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function next() { goTo(current + 1); }
+  function startAuto() { autoTimer = setInterval(next, 5000); }
+  function resetAuto() { clearInterval(autoTimer); startAuto(); }
+
+  // Dot clicks
+  dots.forEach(d => d.addEventListener('click', () => { goTo(+d.dataset.slide); resetAuto(); }));
+
+  // Swipe / drag support
+  let startX = 0, dragging = false;
+  carousel.addEventListener('pointerdown', (e) => { startX = e.clientX; dragging = true; });
+  carousel.addEventListener('pointermove', (e) => { if (dragging) e.preventDefault(); });
+  carousel.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > 40) {
+      diff < 0 ? goTo(current + 1) : goTo(current - 1);
+      resetAuto();
+    }
+  });
+  carousel.addEventListener('pointerleave', () => { dragging = false; });
+
+  startAuto();
 }
 
 
