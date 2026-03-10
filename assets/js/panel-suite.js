@@ -1,14 +1,14 @@
 (function () {
-  function read(key, fallback) {
+  async function read(key, fallback) {
+    if (typeof window.dbRead === 'function') return await window.dbRead(key, fallback);
     try {
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
-    } catch (_) {
-      return fallback;
-    }
+    } catch (_) { return fallback; }
   }
 
-  function write(key, value) {
+  async function write(key, value) {
+    if (typeof window.dbWrite === 'function') { await window.dbWrite(key, value); return; }
     localStorage.setItem(key, JSON.stringify(value));
   }
 
@@ -20,27 +20,34 @@
     return new Date().toLocaleString("en-IN");
   }
 
-  function seed() {
-    if (!read("maithili_news")) {
-      write("maithili_news", [
+  async function seed() {
+    if (!await read("maithili_news")) {
+      await write("maithili_news", [
         { id: uid("news"), title: "Patna civic works review begins", category: "Bihar", status: "approved", author: "Desk", featured: false, createdAt: nowDate() },
         { id: uid("news"), title: "Education budget hearing starts", category: "India", status: "pending", author: "Desk", featured: false, createdAt: nowDate() }
       ]);
     }
-    if (!read("maithili_ads")) write("maithili_ads", { headerEnabled: true, headerSlides: [], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#" });
-    if (!read("maithili_breaking")) write("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
-    if (!read("maithili_businesses")) write("maithili_businesses", []);
-    if (!read("maithili_classifieds")) write("maithili_classifieds", []);
-    if (!read("maithili_reporters")) {
-      write("maithili_reporters", [
+    if (!await read("maithili_ads")) await write("maithili_ads", {
+      headerEnabled: true, headerSlides: [
+        { image: "https://picsum.photos/seed/ad1/1200/200", link: "https://example.com/ad1" },
+        { image: "https://picsum.photos/seed/ad2/1200/200", link: "https://example.com/ad2" },
+        { image: "https://picsum.photos/seed/ad3/1200/200", link: "https://example.com/ad3" },
+        { image: "https://picsum.photos/seed/ad4/1200/200", link: "https://example.com/ad4" }
+      ], sidebarEnabled: true, sidebarImage: "", sidebarLink: "#", sidebar2Enabled: true, sidebar2Image: "", sidebar2Link: "#", footerEnabled: true, footerImage: "", footerLink: "#"
+    });
+    if (!await read("maithili_breaking")) await write("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
+    if (!await read("maithili_businesses")) await write("maithili_businesses", []);
+    if (!await read("maithili_classifieds")) await write("maithili_classifieds", []);
+    if (!await read("maithili_reporters")) {
+      await write("maithili_reporters", [
         { id: uid("rep"), name: "Aman Reporter", email: "aman@maithili.news", password: "reporter123", status: "active", joinedAt: nowDate() }
       ]);
     }
-    if (!read("maithili_reporter_apps")) write("maithili_reporter_apps", []);
-    if (!read("maithili_enewspapers")) write("maithili_enewspapers", []);
-    if (!read("maithili_live_tv")) write("maithili_live_tv", { enabled: true, streams: [] });
-    if (!read("maithili_admin_users")) {
-      write("maithili_admin_users", [
+    if (!await read("maithili_reporter_apps")) await write("maithili_reporter_apps", []);
+    if (!await read("maithili_enewspapers")) await write("maithili_enewspapers", []);
+    if (!await read("maithili_live_tv")) await write("maithili_live_tv", { enabled: true, streams: [] });
+    if (!await read("maithili_admin_users")) {
+      await write("maithili_admin_users", [
         { email: "admin@maithili.news", password: "admin123", role: "admin" }
       ]);
     }
@@ -55,16 +62,16 @@
     });
   }
 
-  function adminInit(root) {
-    seed();
+  async function adminInit(root) {
+    await seed();
     const loginView = root.querySelector("#adminLoginView");
     const dashView = root.querySelector("#adminDashView");
     const err = root.querySelector("#adminError");
 
-    function showDashboard() {
+    async function showDashboard() {
       loginView.classList.add("panel-hidden");
       dashView.classList.remove("panel-hidden");
-      renderAdmin();
+      await renderAdmin();
     }
 
     function showLogin() {
@@ -72,10 +79,10 @@
       loginView.classList.remove("panel-hidden");
     }
 
-    const session = read("maithili_admin_session");
-    if (session && session.role === "admin") showDashboard();
+    const session = await read("maithili_admin_session");
+    if (session && session.role === "admin") await showDashboard();
 
-    root.querySelector("#adminLoginForm").addEventListener("submit", (e) => {
+    root.querySelector("#adminLoginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       err.classList.add("panel-hidden");
       const email = root.querySelector("#adminEmail").value.trim();
@@ -85,37 +92,37 @@
         err.classList.remove("panel-hidden");
         return;
       }
-      const admins = read("maithili_admin_users", []);
+      const admins = await read("maithili_admin_users", []);
       const valid = admins.find((a) => String(a.email || '').toLowerCase() === email.toLowerCase() && a.password === pass);
       if (!valid) {
         err.textContent = "Invalid admin credentials.";
         err.classList.remove("panel-hidden");
         return;
       }
-      write("maithili_admin_session", { role: "admin", email, at: Date.now() });
-      showDashboard();
+      await write("maithili_admin_session", { role: "admin", email, at: Date.now() });
+      await showDashboard();
     });
 
-    root.querySelector("#adminLogout").addEventListener("click", () => {
+    root.querySelector("#adminLogout").addEventListener("click", async () => {
       localStorage.removeItem("maithili_admin_session");
       showLogin();
     });
-    root.querySelector("#adminRefresh")?.addEventListener("click", () => window.location.reload());
+    root.querySelector("#adminRefresh")?.addEventListener("click", async () => window.location.reload());
 
     root.querySelectorAll("[data-tab-btn]").forEach((btn) => {
-      btn.addEventListener("click", () => setTab(root, btn.dataset.tabBtn));
+      btn.addEventListener("click", async () => setTab(root, btn.dataset.tabBtn));
     });
 
-    function renderAdmin() {
-      const news = read("maithili_news", []);
-      const ads = read("maithili_ads", {});
-      const breaking = read("maithili_breaking", {});
-      const businesses = read("maithili_businesses", []);
-      const classifieds = read("maithili_classifieds", []);
-      const reporters = read("maithili_reporters", []);
-      const reporterApps = read("maithili_reporter_apps", []);
-      const papers = read("maithili_enewspapers", []);
-      const liveTv = read("maithili_live_tv", { enabled: true, streams: [] });
+    async function renderAdmin() {
+      const news = await read("maithili_news", []);
+      const ads = await read("maithili_ads", {});
+      const breaking = await read("maithili_breaking", {});
+      const businesses = await read("maithili_businesses", []);
+      const classifieds = await read("maithili_classifieds", []);
+      const reporters = await read("maithili_reporters", []);
+      const reporterApps = await read("maithili_reporter_apps", []);
+      const papers = await read("maithili_enewspapers", []);
+      const liveTv = await read("maithili_live_tv", { enabled: true, streams: [] });
 
       root.querySelector("#statPendingNews").textContent = String(news.filter((n) => n.status === "pending").length);
       root.querySelector("#statPendingReporters").textContent = String(reporterApps.length);
@@ -232,17 +239,17 @@
       `).join("") || "<li>No streams added.</li>";
     }
 
-    root.addEventListener("click", (e) => {
+    root.addEventListener("click", async (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
       const action = btn.dataset.action;
       const id = btn.dataset.id;
-      let news = read("maithili_news", []);
-      let businesses = read("maithili_businesses", []);
-      let classifieds = read("maithili_classifieds", []);
-      let apps = read("maithili_reporter_apps", []);
-      let reps = read("maithili_reporters", []);
-      let live = read("maithili_live_tv", { enabled: true, streams: [] });
+      let news = await read("maithili_news", []);
+      let businesses = await read("maithili_businesses", []);
+      let classifieds = await read("maithili_classifieds", []);
+      let apps = await read("maithili_reporter_apps", []);
+      let reps = await read("maithili_reporters", []);
+      let live = await read("maithili_live_tv", { enabled: true, streams: [] });
 
       if (action === "approveNews") news = news.map((n) => n.id === id ? { ...n, status: "approved" } : n);
       if (action === "rejectNews") news = news.map((n) => n.id === id ? { ...n, status: "rejected" } : n);
@@ -259,45 +266,45 @@
       if (action === "rejectReporterApp") apps = apps.filter((a) => a.id !== id);
       if (action === "deleteLive") live.streams = live.streams.filter((s) => s.id !== id);
 
-      write("maithili_news", news);
-      write("maithili_businesses", businesses);
-      write("maithili_classifieds", classifieds);
-      write("maithili_reporter_apps", apps);
-      write("maithili_reporters", reps);
-      write("maithili_live_tv", live);
-      renderAdmin();
+      await write("maithili_news", news);
+      await write("maithili_businesses", businesses);
+      await write("maithili_classifieds", classifieds);
+      await write("maithili_reporter_apps", apps);
+      await write("maithili_reporters", reps);
+      await write("maithili_live_tv", live);
+      await renderAdmin();
     });
 
-    root.querySelector("#newsForm").addEventListener("submit", (e) => {
+    root.querySelector("#newsForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const t = root.querySelector("#newsTitle").value.trim();
       const c = root.querySelector("#newsCategory").value.trim() || "General";
       if (!t) return;
-      const news = read("maithili_news", []);
+      const news = await read("maithili_news", []);
       news.unshift({ id: uid("news"), title: t, category: c, status: "pending", author: "Admin", featured: false, createdAt: nowDate() });
-      write("maithili_news", news);
+      await write("maithili_news", news);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#breakingSave").addEventListener("click", () => {
+    root.querySelector("#breakingSave").addEventListener("click", async () => {
       const picks = [...root.querySelectorAll("[data-break-id]:checked")].map((x) => x.dataset.breakId);
-      write("maithili_breaking", {
+      await write("maithili_breaking", {
         enabled: root.querySelector("#breakingEnabled").checked,
         text: root.querySelector("#breakingText").value.trim(),
         selectedNewsIds: picks
       });
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#adsSave").addEventListener("click", () => {
+    root.querySelector("#adsSave").addEventListener("click", async () => {
       const headerSlides = [];
       for (let i = 1; i <= 4; i++) {
         const img = (root.querySelector(`#adSlide${i}Image`)?.value || "").trim();
         const lnk = (root.querySelector(`#adSlide${i}Link`)?.value || "#").trim();
         headerSlides.push({ image: img, link: lnk });
       }
-      write("maithili_ads", {
+      await write("maithili_ads", {
         headerEnabled: root.querySelector("#adHeaderEnabled").checked,
         headerSlides,
         sidebarEnabled: root.querySelector("#adSidebarEnabled").checked,
@@ -310,12 +317,12 @@
         footerImage: root.querySelector("#adFooterImage").value.trim(),
         footerLink: root.querySelector("#adFooterLink").value.trim()
       });
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#businessForm").addEventListener("submit", (e) => {
+    root.querySelector("#businessForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const list = read("maithili_businesses", []);
+      const list = await read("maithili_businesses", []);
       list.unshift({
         id: uid("biz"),
         name: root.querySelector("#bizName").value.trim(),
@@ -323,14 +330,14 @@
         city: root.querySelector("#bizCity").value.trim(),
         status: "pending"
       });
-      write("maithili_businesses", list);
+      await write("maithili_businesses", list);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#classifiedForm").addEventListener("submit", (e) => {
+    root.querySelector("#classifiedForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const list = read("maithili_classifieds", []);
+      const list = await read("maithili_classifieds", []);
       list.unshift({
         id: uid("cls"),
         title: root.querySelector("#clsTitle").value.trim(),
@@ -338,14 +345,14 @@
         contact: root.querySelector("#clsContact").value.trim(),
         status: "pending"
       });
-      write("maithili_classifieds", list);
+      await write("maithili_classifieds", list);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#createReporterForm").addEventListener("submit", (e) => {
+    root.querySelector("#createReporterForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const reps = read("maithili_reporters", []);
+      const reps = await read("maithili_reporters", []);
       reps.unshift({
         id: uid("rep"),
         name: root.querySelector("#repName").value.trim(),
@@ -354,28 +361,28 @@
         status: "active",
         joinedAt: nowDate()
       });
-      write("maithili_reporters", reps);
+      await write("maithili_reporters", reps);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#paperForm").addEventListener("submit", (e) => {
+    root.querySelector("#paperForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const list = read("maithili_enewspapers", []);
+      const list = await read("maithili_enewspapers", []);
       list.unshift({
         id: uid("paper"),
         title: root.querySelector("#paperTitle").value.trim(),
         editionDate: root.querySelector("#paperDate").value,
         pdfUrl: root.querySelector("#paperUrl").value.trim()
       });
-      write("maithili_enewspapers", list);
+      await write("maithili_enewspapers", list);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#liveForm").addEventListener("submit", (e) => {
+    root.querySelector("#liveForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const live = read("maithili_live_tv", { enabled: true, streams: [] });
+      const live = await read("maithili_live_tv", { enabled: true, streams: [] });
       live.enabled = root.querySelector("#liveEnabled").checked;
       live.streams.unshift({
         id: uid("live"),
@@ -383,38 +390,38 @@
         url: root.querySelector("#liveUrl").value.trim(),
         isLive: root.querySelector("#liveMark").checked
       });
-      write("maithili_live_tv", live);
+      await write("maithili_live_tv", live);
       e.target.reset();
-      renderAdmin();
+      await renderAdmin();
     });
 
-    root.querySelector("#saveLiveToggle").addEventListener("click", () => {
-      const live = read("maithili_live_tv", { enabled: true, streams: [] });
+    root.querySelector("#saveLiveToggle").addEventListener("click", async () => {
+      const live = await read("maithili_live_tv", { enabled: true, streams: [] });
       live.enabled = root.querySelector("#liveEnabled").checked;
-      write("maithili_live_tv", live);
-      renderAdmin();
+      await write("maithili_live_tv", live);
+      await renderAdmin();
     });
 
-    root.querySelector("#clearAllData").addEventListener("click", () => {
+    root.querySelector("#clearAllData").addEventListener("click", async () => {
       [
         "maithili_news", "maithili_ads", "maithili_breaking", "maithili_businesses", "maithili_classifieds",
         "maithili_reporters", "maithili_reporter_apps", "maithili_enewspapers", "maithili_live_tv"
       ].forEach((k) => localStorage.removeItem(k));
-      seed();
-      renderAdmin();
+      await seed();
+      await renderAdmin();
     });
   }
 
-  function reporterInit(root) {
-    seed();
+  async function reporterInit(root) {
+    await seed();
     const loginView = root.querySelector("#reporterLoginView");
     const dashView = root.querySelector("#reporterDashView");
     const err = root.querySelector("#reporterError");
 
-    function showDash() {
+    async function showDash() {
       loginView.classList.add("panel-hidden");
       dashView.classList.remove("panel-hidden");
-      renderReporter();
+      await renderReporter();
     }
 
     function showLogin() {
@@ -422,28 +429,28 @@
       loginView.classList.remove("panel-hidden");
     }
 
-    const session = read("maithili_reporter_session");
-    if (session && session.role === "reporter") showDash();
+    const session = await read("maithili_reporter_session");
+    if (session && session.role === "reporter") await showDash();
 
-    root.querySelector("#reporterLoginForm").addEventListener("submit", (e) => {
+    root.querySelector("#reporterLoginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       err.classList.add("panel-hidden");
       const email = root.querySelector("#reporterEmail").value.trim();
       const pass = root.querySelector("#reporterPassword").value.trim();
-      const reps = read("maithili_reporters", []);
+      const reps = await read("maithili_reporters", []);
       const found = reps.find((r) => r.email.toLowerCase() === email.toLowerCase() && r.password === pass);
       if (!found) {
         err.textContent = "Invalid reporter credentials.";
         err.classList.remove("panel-hidden");
         return;
       }
-      write("maithili_reporter_session", { role: "reporter", email: found.email, name: found.name });
-      showDash();
+      await write("maithili_reporter_session", { role: "reporter", email: found.email, name: found.name });
+      await showDash();
     });
 
-    root.querySelector("#applyReporterForm").addEventListener("submit", (e) => {
+    root.querySelector("#applyReporterForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const apps = read("maithili_reporter_apps", []);
+      const apps = await read("maithili_reporter_apps", []);
       apps.unshift({
         id: uid("app"),
         name: root.querySelector("#applyName").value.trim(),
@@ -452,27 +459,27 @@
         phone: root.querySelector("#applyPhone").value.trim(),
         createdAt: nowDate()
       });
-      write("maithili_reporter_apps", apps);
+      await write("maithili_reporter_apps", apps);
       e.target.reset();
       err.textContent = "Application submitted. Wait for admin approval.";
       err.classList.remove("panel-hidden");
     });
 
-    root.querySelector("#reporterLogout").addEventListener("click", () => {
+    root.querySelector("#reporterLogout").addEventListener("click", async () => {
       localStorage.removeItem("maithili_reporter_session");
       showLogin();
     });
-    root.querySelector("#reporterRefresh")?.addEventListener("click", () => window.location.reload());
+    root.querySelector("#reporterRefresh")?.addEventListener("click", async () => window.location.reload());
 
     root.querySelectorAll("[data-tab-btn]").forEach((btn) => {
-      btn.addEventListener("click", () => setTab(root, btn.dataset.tabBtn));
+      btn.addEventListener("click", async () => setTab(root, btn.dataset.tabBtn));
     });
 
-    function renderReporter() {
-      const sessionData = read("maithili_reporter_session", {});
+    async function renderReporter() {
+      const sessionData = await read("maithili_reporter_session", {});
       const reporterName = sessionData.name || "Reporter";
       root.querySelector("#reporterWelcome").textContent = `Welcome, ${reporterName}`;
-      const news = read("maithili_news", []).filter((n) =>
+      const news = await read("maithili_news", []).filter((n) =>
         n.ownerEmail === sessionData.email ||
         n.author === reporterName ||
         n.author === sessionData.email ||
@@ -492,14 +499,14 @@
       `).join("") || "<li>No submissions yet.</li>";
     }
 
-    root.querySelector("#reporterNewsForm").addEventListener("submit", (e) => {
+    root.querySelector("#reporterNewsForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const sessionData = read("maithili_reporter_session", {});
+      const sessionData = await read("maithili_reporter_session", {});
       const title = root.querySelector("#rNewsTitle").value.trim();
       const category = root.querySelector("#rNewsCategory").value.trim();
       const content = root.querySelector("#rNewsContent").value.trim();
       if (!title || !category || !content) return;
-      const list = read("maithili_news", []);
+      const list = await read("maithili_news", []);
       list.unshift({
         id: uid("news"),
         title,
@@ -519,29 +526,29 @@
         showOnHome: root.querySelector("#rNewsShowHome").checked,
         createdAt: nowDate()
       });
-      write("maithili_news", list);
+      await write("maithili_news", list);
       e.target.reset();
       const showHome = root.querySelector("#rNewsShowHome");
       if (showHome) showHome.checked = true;
-      renderReporter();
+      await renderReporter();
     });
 
-    root.querySelector("#reporterBreakingForm").addEventListener("submit", (e) => {
+    root.querySelector("#reporterBreakingForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const msg = root.querySelector("#rBreakingText").value.trim();
       if (!msg) return;
-      const breaking = read("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
+      const breaking = await read("maithili_breaking", { enabled: true, text: "", selectedNewsIds: [] });
       breaking.text = msg;
-      write("maithili_breaking", breaking);
+      await write("maithili_breaking", breaking);
       e.target.reset();
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     const root = document.querySelector("[data-panel-app]");
     if (!root) return;
     const type = root.getAttribute("data-panel-app");
-    if (type === "admin") adminInit(root);
-    if (type === "reporter") reporterInit(root);
+    if (type === "admin") await adminInit(root);
+    if (type === "reporter") await reporterInit(root);
   });
 })();

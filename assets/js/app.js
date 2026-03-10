@@ -30,7 +30,10 @@ const weatherByLang = {
   mai: 'पटना 28 C, धुंध'
 };
 
-function readPanelData(key, fallback) {
+async function readPanelData(key, fallback) {
+  if (typeof window.dbRead === 'function') {
+    return await window.dbRead(key, fallback);
+  }
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -93,7 +96,7 @@ function normalize(path) {
   return p;
 }
 
-function initLayout() {
+async function initLayout() {
   const path = normalize(window.location.pathname);
   const primaryLinks = routes
     .slice(0, 9)
@@ -220,10 +223,10 @@ function initLayout() {
   }
 
   wireShell();
-  applyFrontendControls(path);
+  await applyFrontendControls(path);
   optimizeMediaAndLayout();
-  wireArticleLinks(path);
-  renderArticlePage(path);
+  await wireArticleLinks(path);
+  await renderArticlePage(path);
 }
 
 function optimizeMediaAndLayout() {
@@ -242,20 +245,20 @@ function optimizeMediaAndLayout() {
   });
 }
 
-function applyFrontendControls(path) {
-  applyHeroCarousel(path);
-  applyTickerControl();
-  applyAdsControl();
-  applyLatestUpdates(path);
-  applyDynamicHomeSections(path);
-  applySearchLogic(path);
-  applyLiveTvControl(path);
-  applyBusinessControl(path);
-  applyClassifiedControl(path);
-  applyENewspaperControl(path);
+async function applyFrontendControls(path) {
+  await applyHeroCarousel(path);
+  await applyTickerControl();
+  await applyAdsControl();
+  await applyLatestUpdates(path);
+  await applyDynamicHomeSections(path);
+  await applySearchLogic(path);
+  await applyLiveTvControl(path);
+  await applyBusinessControl(path);
+  await applyClassifiedControl(path);
+  await applyENewspaperControl(path);
 }
 
-function applyHeroCarousel(path) {
+async function applyHeroCarousel(path) {
   if (!path.startsWith('/home/')) return;
   const track = document.getElementById('carouselTrack');
   const dotsWrap = document.getElementById('carouselDots');
@@ -263,7 +266,7 @@ function applyHeroCarousel(path) {
   const nextBtn = document.getElementById('carouselNext');
   if (!track || !dotsWrap) return;
 
-  const news = readPanelData('maithili_news', []);
+  const news = await readPanelData('maithili_news', []);
   const featured = news.filter((n) => n.status === 'approved' && n.featured);
 
   const fallbackSlides = [
@@ -311,13 +314,13 @@ function applyHeroCarousel(path) {
   function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(current + 1), 5000); }
 }
 
-function applyTickerControl() {
+async function applyTickerControl() {
   const bar = document.querySelector('.breaking-bar');
   const ticker = document.getElementById('ticker');
   if (!bar || !ticker) return;
 
-  const breaking = readPanelData('maithili_breaking', { enabled: true, text: '', selectedNewsIds: [] });
-  const news = readPanelData('maithili_news', []);
+  const breaking = await readPanelData('maithili_breaking', { enabled: true, text: '', selectedNewsIds: [] });
+  const news = await readPanelData('maithili_news', []);
   const approved = news.filter((n) => n.status === 'approved');
   const picked = approved.filter((n) => (breaking.selectedNewsIds || []).includes(n.id)).map((n) => n.title);
   const selected = (picked.length ? picked : approved.slice(0, 4).map((n) => n.title)).filter(Boolean);
@@ -336,8 +339,8 @@ function applyTickerControl() {
   if (track) track.innerHTML = [...base, ...base].map((x) => `<span>${x}</span>`).join('');
 }
 
-function applyAdsControl() {
-  const ads = readPanelData('maithili_ads', {
+async function applyAdsControl() {
+  const ads = await readPanelData('maithili_ads', {
     headerEnabled: true, headerSlides: [],
     sidebarEnabled: true, sidebarImage: '', sidebarLink: '#',
     sidebar2Enabled: true, sidebar2Image: '', sidebar2Link: '#',
@@ -444,9 +447,9 @@ function initHeaderAdCarousel(carousel, count) {
 }
 
 
-function applyLiveTvControl(path) {
+async function applyLiveTvControl(path) {
   if (!path.startsWith('/live-tv/')) return;
-  const live = readPanelData('maithili_live_tv', { enabled: true, streams: [] });
+  const live = await readPanelData('maithili_live_tv', { enabled: true, streams: [] });
   const iframe = document.querySelector('.video-embed');
   if (!iframe) return;
   const onAir = document.querySelector('.surface .kicker');
@@ -466,9 +469,9 @@ function applyLiveTvControl(path) {
   }
 }
 
-function applyBusinessControl(path) {
+async function applyBusinessControl(path) {
   if (!path.startsWith('/business/') && !path.startsWith('/home/')) return;
-  const businesses = readPanelData('maithili_businesses', []).filter((b) => b.status === 'approved');
+  const businesses = await readPanelData('maithili_businesses', []).filter((b) => b.status === 'approved');
   if (!businesses.length) return;
   const main = document.querySelector('.split > div');
   if (!main) return;
@@ -493,9 +496,9 @@ function applyBusinessControl(path) {
   main.insertBefore(section, main.children[2] || null);
 }
 
-function applyDynamicHomeSections(path) {
+async function applyDynamicHomeSections(path) {
   if (!path.startsWith('/home/')) return;
-  const news = readPanelData('maithili_news', []);
+  const news = await readPanelData('maithili_news', []);
   const approved = news.filter((n) => n.status === 'approved').sort((a, b) => {
     const da = new Date(a.createdAt);
     const db = new Date(b.createdAt);
@@ -550,7 +553,7 @@ function applyDynamicHomeSections(path) {
   }
 }
 
-function applySearchLogic(path) {
+async function applySearchLogic(path) {
   if (!path.startsWith('/search/')) return;
   const form = document.querySelector('.search-bar');
   const input = form?.querySelector('input');
@@ -558,10 +561,10 @@ function applySearchLogic(path) {
   const resultsGrid = document.querySelector('.news-grid-2');
   if (!form || !resultsGrid) return;
 
-  function doSearch(query) {
+  async function doSearch(query) {
     if (!query.trim()) return;
-    const news = readPanelData('maithili_news', []);
-    const staticArticles = readPanelData('maithili_static_articles', []);
+    const news = await readPanelData('maithili_news', []);
+    const staticArticles = await readPanelData('maithili_static_articles', []);
     const all = [...news, ...staticArticles];
     const results = all.filter(n =>
       (n.title?.toLowerCase().includes(query.toLowerCase())) ||
@@ -585,16 +588,16 @@ function applySearchLogic(path) {
     }
   }
 
-  button.addEventListener('click', () => doSearch(input.value));
+  button.addEventListener('click', async () => await doSearch(input.value));
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     doSearch(input.value);
   });
 }
 
-function applyClassifiedControl(path) {
+async function applyClassifiedControl(path) {
   if (!path.startsWith('/home/') && !path.startsWith('/business/')) return;
-  const classifieds = readPanelData('maithili_classifieds', []).filter((c) => c.status === 'approved');
+  const classifieds = await readPanelData('maithili_classifieds', []).filter((c) => c.status === 'approved');
   if (!classifieds.length) return;
   const side = document.querySelector('.split aside') || document.querySelector('.grid');
   if (!side) return;
@@ -612,14 +615,14 @@ function applyClassifiedControl(path) {
   side.prepend(widget);
 }
 
-function applyLatestUpdates(path) {
+async function applyLatestUpdates(path) {
   if (!path.startsWith('/home/')) return;
   const side = document.querySelector('aside');
   if (!side) return;
   const widget = side.querySelector('.sidebar-widget');
   if (!widget || !widget.querySelector('h3').textContent.includes('Latest Updates')) return;
 
-  const news = readPanelData('maithili_news', []);
+  const news = await readPanelData('maithili_news', []);
   const approved = news.filter((n) => n.status === 'approved').sort((a, b) => {
     const da = new Date(a.createdAt);
     const db = new Date(b.createdAt);
@@ -639,9 +642,9 @@ function applyLatestUpdates(path) {
   }
 }
 
-function applyENewspaperControl(path) {
+async function applyENewspaperControl(path) {
   if (!path.startsWith('/home/') && !path.startsWith('/about/') && !path.startsWith('/india/')) return;
-  const papers = readPanelData('maithili_enewspapers', []);
+  const papers = await readPanelData('maithili_enewspapers', []);
   if (!papers.length) return;
   const side = document.querySelector('.split aside') || document.querySelector('.grid');
   if (!side) return;
@@ -659,8 +662,8 @@ function applyENewspaperControl(path) {
   side.prepend(widget);
 }
 
-function storeStaticArticle(payload) {
-  const all = readPanelData('maithili_static_articles', []);
+async function storeStaticArticle(payload) {
+  const all = await readPanelData('maithili_static_articles', []);
   const exists = all.find((x) => x.id === payload.id || (x.title === payload.title && x.mainImage === payload.mainImage));
   if (!exists) {
     all.unshift(payload);
@@ -672,12 +675,13 @@ function firstText(el, selector) {
   return el.querySelector(selector)?.textContent?.trim() || '';
 }
 
-function wireArticleLinks(path) {
+async function wireArticleLinks(path) {
   if (path.startsWith('/admin-panel/') || path.startsWith('/reporter-panel/') || path.startsWith('/article-page/')) return;
   const cards = [...document.querySelectorAll('.card, .hero-story')];
-  cards.forEach((card, idx) => {
+  let idx = 0;
+  for (const card of cards) {
     const title = firstText(card, '.headline-md, .headline-lg, .headline-xl, h3, h2') || card.textContent.trim().slice(0, 120);
-    if (!title) return;
+    if (!title) { idx++; continue; }
     const existing = card.getAttribute('data-news-id');
     const id = existing || `auto_${btoa(unescape(encodeURIComponent(`${title}_${idx}`))).replace(/=+$/g, '')}`;
     card.setAttribute('data-news-id', id);
@@ -696,24 +700,25 @@ function wireArticleLinks(path) {
       content: card.getAttribute('data-content') || summary || 'Detailed article will be updated by editorial desk.',
       createdAt: new Date().toISOString()
     };
-    storeStaticArticle(payload);
+    await storeStaticArticle(payload);
     if (!card.dataset.boundOpenArticle) {
       card.dataset.boundOpenArticle = '1';
       card.addEventListener('click', () => {
         window.location.href = `/article-page/?id=${encodeURIComponent(id)}`;
       });
     }
-  });
+    idx++;
+  }
 }
 
-function renderArticlePage(path) {
+async function renderArticlePage(path) {
   if (!path.startsWith('/article-page/')) return;
   const root = document.getElementById('articlePageRoot');
   if (!root) return;
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
-  const managed = readPanelData('maithili_news', []);
-  const staticArticles = readPanelData('maithili_static_articles', []);
+  const managed = await readPanelData('maithili_news', []);
+  const staticArticles = await readPanelData('maithili_static_articles', []);
   const all = [...managed, ...staticArticles];
   const current = (id && all.find((x) => x.id === id)) || managed.find((x) => x.status === 'approved') || staticArticles[0] || all[0] || {
     id: 'fallback',
@@ -884,7 +889,7 @@ function injectGoogleTranslate() {
   document.body.appendChild(script);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initLayout();
+document.addEventListener('DOMContentLoaded', async () => {
+  await initLayout();
   injectGoogleTranslate();
 });
