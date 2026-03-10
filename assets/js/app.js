@@ -166,7 +166,7 @@ function initLayout() {
     <div class="breaking-bar" role="status" aria-live="polite">
       <div class="container breaking-wrap">
         <span class="breaking-label">BREAKING</span>
-        <div class="ticker" id="ticker"></div>
+        <div id="ticker"><div class="ticker-track"></div></div>
       </div>
     </div>
   `;
@@ -332,7 +332,8 @@ function applyTickerControl() {
   }
 
   bar.style.display = '';
-  ticker.innerHTML = [...base, ...base].map((x) => `<span>${x}</span>`).join('');
+  const track = ticker.querySelector('.ticker-track');
+  if (track) track.innerHTML = [...base, ...base].map((x) => `<span>${x}</span>`).join('');
 }
 
 function applyAdsControl() {
@@ -732,8 +733,9 @@ function wireShell() {
   });
 
   if (ticker) {
+    const track = ticker.querySelector('.ticker-track');
     const joined = [...tickerItems, ...tickerItems].map((x) => `<span>${x}</span>`).join('');
-    ticker.innerHTML = joined;
+    if (track) track.innerHTML = joined;
   }
 
   const savedLang = localStorage.getItem('lang') || 'en';
