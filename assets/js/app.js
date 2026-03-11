@@ -244,13 +244,6 @@ function optimizeMediaAndLayout() {
     if (!img.getAttribute('decoding')) img.setAttribute('decoding', 'async');
     if (!img.getAttribute('referrerpolicy')) img.setAttribute('referrerpolicy', 'no-referrer');
   });
-
-  document.querySelectorAll('.card, .sidebar-widget, .surface').forEach((el) => {
-    if (!el.style.contentVisibility) {
-      el.style.contentVisibility = 'auto';
-      el.style.containIntrinsicSize = '1px 400px';
-    }
-  });
 }
 
 async function applyFrontendControls(path) {
@@ -584,18 +577,22 @@ async function applyAllNewsGrid(path) {
   section.setAttribute('data-all-news-grid', '1');
   section.innerHTML = `
     <div class="section-title"><h2>All News</h2></div>
-    <div class="news-grid-2">
-      ${articles.map(n => `
-        <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
-          ${(n.mainImage || n.thumbnail) ? `<img src="${safeHttpUrl(n.mainImage || n.thumbnail)}" alt="${escapeHtml(n.title)}" />` : ''}
-          <div class="card-content">
+    <div class="news-grid-2" style="align-items:stretch;">
+      ${articles.map(n => {
+        let desc = (n.shortDescription || '').replace(/<[^>]*>?/gm, '');
+        if (desc.length > 100) desc = desc.substring(0, 100) + '...';
+        return `
+        <article class="card" data-news-id="${n.id}" style="cursor:pointer; display:flex; flex-direction:column; height:100%; overflow:hidden;">
+          ${(n.mainImage || n.thumbnail) ? `<img src="${safeHttpUrl(n.mainImage || n.thumbnail)}" alt="${escapeHtml(n.title)}" style="height:180px; object-fit:cover; width:100%;" />` : ''}
+          <div class="card-content" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
             <span class="kicker">${escapeHtml(n.category || 'News')}</span>
-            <h3 class="headline-md">${escapeHtml(n.title)}</h3>
-            <p class="muted">${escapeHtml(n.shortDescription || '')}</p>
-            <span class="muted" style="font-size:0.78rem;">${n.createdAt || ''}</span>
+            <h3 class="headline-md" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(n.title)}</h3>
+            <p class="muted" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; flex:1;">${escapeHtml(desc)}</p>
+            <span class="muted" style="font-size:0.78rem; margin-top:auto;">${n.createdAt || ''}</span>
           </div>
         </article>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
   main.appendChild(section);
