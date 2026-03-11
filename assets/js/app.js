@@ -42,8 +42,16 @@ async function readPanelData(key, fallback) {
   }
 }
 
+function decodeHtmlEntities(str) {
+  if (!str) return '';
+  var txt = document.createElement('textarea');
+  txt.innerHTML = str;
+  return txt.value;
+}
+
 function escapeHtml(value) {
-  return String(value || '')
+  var decoded = decodeHtmlEntities(String(value || ''));
+  return decoded
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -251,6 +259,8 @@ async function applyFrontendControls(path) {
   await applyAdsControl();
   await applyLatestUpdates(path);
   await applyDynamicHomeSections(path);
+  await applyAllNewsGrid(path);
+  await applyCategoryPage(path);
   await applySearchLogic(path);
   await applyLiveTvControl(path);
   await applyBusinessControl(path);
@@ -505,10 +515,10 @@ async function applyDynamicHomeSections(path) {
     return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
   });
 
-  // Top Stories (3 latest)
+  // Top Stories (6 latest)
   const topStoriesGrid = document.querySelector('.news-grid-3');
   if (topStoriesGrid && approved.length >= 3) {
-    topStoriesGrid.innerHTML = approved.slice(0, 3).map(n => `
+    topStoriesGrid.innerHTML = approved.slice(0, 6).map(n => `
       <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
         <img src="${safeHttpUrl(n.mainImage || n.thumbnail) || 'https://images.unsplash.com/photo-1555848962-6e79363ec58f'}" alt="${escapeHtml(n.title)}" />
         <div class="card-content">
@@ -550,6 +560,106 @@ async function applyDynamicHomeSections(path) {
         </article>
       `).join('');
     }
+  }
+}
+
+async function applyAllNewsGrid(path) {
+  if (!path.startsWith('/home/')) return;
+  const news = await readPanelData('maithili_news', []);
+  const approved = news.filter(n => n.status === 'approved').sort((a, b) => {
+    const da = new Date(a.createdAt);
+    const db = new Date(b.createdAt);
+    return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
+  });
+  const articles = approved.slice(0, 40);
+  if (!articles.length) return;
+
+  const main = document.querySelector('.split > div');
+  if (!main) return;
+
+  const existingSection = document.querySelector('[data-all-news-grid]');
+  if (existingSection) existingSection.remove();
+
+  const section = document.createElement('section');
+  section.setAttribute('data-all-news-grid', '1');
+  section.innerHTML = `
+    <div class="section-title"><h2>All News</h2></div>
+    <div class="news-grid-2">
+      ${articles.map(n => `
+        <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
+          ${(n.mainImage || n.thumbnail) ? `<img src="${safeHttpUrl(n.mainImage || n.thumbnail)}" alt="${escapeHtml(n.title)}" />` : ''}
+          <div class="card-content">
+            <span class="kicker">${escapeHtml(n.category || 'News')}</span>
+            <h3 class="headline-md">${escapeHtml(n.title)}</h3>
+            <p class="muted">${escapeHtml(n.shortDescription || '')}</p>
+            <span class="muted" style="font-size:0.78rem;">${n.createdAt || ''}</span>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+  main.appendChild(section);
+}
+
+async function applyCategoryPage(path) {
+  const categoryMap = {
+    '/politics/': ['Politics'],
+    '/india/': ['India'],
+    '/bihar/': ['Bihar'],
+    '/world/': ['World'],
+    '/business/': ['Business'],
+    '/technology/': ['Technology'],
+    '/sports/': ['Sports'],
+    '/entertainment/': ['Entertainment'],
+    '/lifestyle/': ['Lifestyle'],
+  };
+  const matchedCats = categoryMap[path];
+  if (!matchedCats) return;
+
+  const news = await readPanelData('maithili_news', []);
+  const approved = news.filter(n => n.status === 'approved').sort((a, b) => {
+    const da = new Date(a.createdAt);
+    const db = new Date(b.createdAt);
+    return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
+  });
+
+  const catArticles = approved.filter(n => {
+    const cat = (n.category || '').toLowerCase();
+    return matchedCats.some(c => cat === c.toLowerCase() || cat.includes(c.toLowerCase()));
+  });
+
+  // Also include any that don't match a specific category if this is a broad page
+  const allCatArticles = catArticles.length > 0 ? catArticles : approved;
+
+  const grid = document.querySelector('.news-grid-3');
+  if (grid && allCatArticles.length) {
+    grid.innerHTML = allCatArticles.slice(0, 30).map(n => `
+      <article class="card" data-news-id="${n.id}" style="cursor:pointer;">
+        ${(n.mainImage || n.thumbnail) ? `<img src="${safeHttpUrl(n.mainImage || n.thumbnail)}" alt="${escapeHtml(n.title)}" />` : ''}
+        <div class="card-content">
+          <h3 class="headline-md">${escapeHtml(n.title)}</h3>
+          <p class="muted">${escapeHtml(n.shortDescription || '')}</p>
+          <span class="muted" style="font-size:0.78rem;">${n.createdAt || ''}</span>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  // Also populate the featured article at the top if it exists
+  const featuredArticle = document.querySelector('.surface .headline-lg');
+  if (featuredArticle && allCatArticles.length) {
+    const top = allCatArticles[0];
+    featuredArticle.textContent = decodeHtmlEntities(top.title);
+    const desc = featuredArticle.parentElement?.querySelector('.muted');
+    if (desc) desc.textContent = decodeHtmlEntities(top.shortDescription || '');
+  }
+
+  // Update trending sidebar
+  const trendList = document.querySelector('aside .sidebar-widget .list');
+  if (trendList && allCatArticles.length) {
+    trendList.innerHTML = allCatArticles.slice(0, 6).map(n =>
+      `<li><a href="/article-page/?id=${encodeURIComponent(n.id)}">${escapeHtml(n.title)}</a></li>`
+    ).join('');
   }
 }
 

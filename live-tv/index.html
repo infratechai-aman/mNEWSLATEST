@@ -1,59 +1,340 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Live TV streaming page for Maithili News." />
+  <meta name="description" content="Watch Maithili News Live TV - 24x7 live stream, breaking news, and exclusive coverage." />
   <title>Live TV | Maithili News</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="icon" href="/assets/img/maithili_logo.png" type="image/png">
+  <style>
+    .livetv-hero {
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-top: 1rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+    .livetv-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 40%, rgba(220,38,38,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 60%, rgba(59,130,246,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .livetv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+    .livetv-header h1 {
+      color: #fff;
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: #fff;
+      padding: 0.45rem 1.2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(220,38,38,0.4);
+      animation: livePulse 2s infinite;
+    }
+    .live-badge::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      animation: blink 1.2s steps(2) infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(220,38,38,0.4); }
+      50% { box-shadow: 0 0 35px rgba(220,38,38,0.7); }
+    }
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .livetv-video-wrap {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.08);
+    }
+    .livetv-video-wrap iframe {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: none;
+      display: block;
+    }
+    .livetv-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 0;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .livetv-info .on-air-title {
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    .livetv-info .viewer-count {
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+    /* Schedule cards */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .schedule-card {
+      background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%);
+      border-radius: 14px;
+      padding: 1.2rem;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .schedule-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(79,70,229,0.3);
+    }
+    .schedule-card .time {
+      color: #a78bfa;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+    .schedule-card .show-name {
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin: 0.4rem 0 0.2rem;
+    }
+    .schedule-card .show-desc {
+      color: #94a3b8;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .schedule-card.now-playing {
+      background: linear-gradient(145deg, #7f1d1d 0%, #991b1b 100%);
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .schedule-card.now-playing .time {
+      color: #fca5a5;
+    }
+    /* Headlines section */
+    .live-headlines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .live-headline-card {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 1.2rem;
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    .live-headline-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .live-headline-card h3 {
+      margin: 0 0 0.3rem;
+      font-size: 0.95rem;
+    }
+    .live-headline-card .muted {
+      font-size: 0.8rem;
+    }
+    /* Viewer interaction */
+    .interaction-card {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .interaction-card h3 {
+      color: #fff;
+      margin: 0 0 1rem;
+    }
+    .interaction-card input,
+    .interaction-card textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .interaction-card input:focus,
+    .interaction-card textarea:focus {
+      border-color: #6366f1;
+    }
+    .interaction-card textarea {
+      margin-top: 0.6rem;
+      resize: vertical;
+    }
+    .interaction-card button {
+      margin-top: 0.8rem;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 1.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .interaction-card button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 16px rgba(220,38,38,0.4);
+    }
+    .livetv-split {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .livetv-split { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <div id="site-shell"></div>
   <main class="page-main">
     <div class="container">
-<section class="page-header"><h1 class="headline-xl" style="margin:0;">Live TV</h1><p style="margin:0.4rem 0 0; opacity:0.9;">24x7 live stream, lineup schedule, and live headlines.</p></section>
-<section class="split" style="margin-top:1rem;">
-  <div>
-    <div class="surface" style="padding:1rem;">
-      <span class="kicker">On Air</span>
-      <iframe class="video-embed" src="https://www.youtube.com/embed/21X5lGlDOfg" title="Live TV stream"></iframe>
-    </div>
-    <div class="section-title"><h2>Live Headlines</h2></div>
-    <div class="news-grid-2">
-      <article class="card"><div class="card-content"><h3 class="headline-md">Assembly floor updates coming in from Patna bureau</h3></div></article>
-      <article class="card"><div class="card-content"><h3 class="headline-md">Market and commodity reaction to policy announcements</h3></div></article>
-      <article class="card"><div class="card-content"><h3 class="headline-md">District weather cells issue high-alert advisories</h3></div></article>
-      <article class="card"><div class="card-content"><h3 class="headline-md">Sports desk tracks major domestic fixtures live</h3></div></article>
-    </div>
-    <div class="ad-slot" style="margin-top:1rem;">In-Article Ad</div>
-  </div>
-  <aside class="grid">
-    <div class="sidebar-widget">
-      <h3 class="headline-md">Schedule</h3>
-      <ul class="list">
-        <li>07:00 PM - Prime Time Debate</li>
-        <li>08:00 PM - National Bulletin</li>
-        <li>09:00 PM - Ground Report Special</li>
-        <li>10:00 PM - Business Night</li>
-      </ul>
-    </div>
-    <div class="sidebar-widget">
-      <h3 class="headline-md">Viewer Interaction</h3>
-      <input type="text" placeholder="Name" />
-      <textarea rows="4" placeholder="Share your question for the show" style="margin-top:0.6rem;"></textarea>
-      <button type="button" class="primary" style="margin-top:0.6rem;">Send Message</button>
-    </div>
-    <div class="ad-slot">Sidebar Ad</div>
-  </aside>
-</section>
+
+      <!-- Hero Section -->
+      <div class="livetv-hero">
+        <div class="livetv-header">
+          <h1>Live TV</h1>
+          <span class="live-badge">Live Now</span>
+        </div>
+        <div class="livetv-video-wrap">
+          <iframe class="video-embed" src="https://www.youtube.com/embed/21X5lGlDOfg?autoplay=1&mute=1" title="Live TV stream" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        </div>
+        <div class="livetv-info">
+          <span class="on-air-title" id="onAirTitle">24x7 Maithili News Live</span>
+          <span class="viewer-count">🔴 Streaming Live</span>
+        </div>
+      </div>
+
+      <!-- Schedule + Sidebar -->
+      <div class="livetv-split">
+        <div>
+          <div class="section-title"><h2>Today's Schedule</h2></div>
+          <div class="schedule-grid">
+            <div class="schedule-card">
+              <span class="time">06:00 AM</span>
+              <div class="show-name">Morning Briefing</div>
+              <div class="show-desc">Start your day with top headlines and weather updates</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">09:00 AM</span>
+              <div class="show-name">Bihar Connect</div>
+              <div class="show-desc">District-level updates and ground reports from Bihar</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">12:00 PM</span>
+              <div class="show-name">Midday Bulletin</div>
+              <div class="show-desc">National and international news roundup</div>
+            </div>
+            <div class="schedule-card now-playing">
+              <span class="time">03:00 PM - Now</span>
+              <div class="show-name">Special Report</div>
+              <div class="show-desc">In-depth analysis on trending topics and policy changes</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">07:00 PM</span>
+              <div class="show-name">Prime Time Debate</div>
+              <div class="show-desc">Panel discussion on the day's most impactful stories</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">09:00 PM</span>
+              <div class="show-name">Ground Report</div>
+              <div class="show-desc">Exclusive field reporting and investigative pieces</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">10:00 PM</span>
+              <div class="show-name">Business Night</div>
+              <div class="show-desc">Market closes, earnings reviews and economic outlook</div>
+            </div>
+            <div class="schedule-card">
+              <span class="time">11:00 PM</span>
+              <div class="show-name">Night Wrap</div>
+              <div class="show-desc">Summary of the day and preview of tomorrow</div>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top:1.5rem;"><h2>Live Headlines</h2></div>
+          <div class="live-headlines-grid" id="liveHeadlinesGrid">
+            <div class="live-headline-card">
+              <h3 class="headline-md">Assembly floor updates coming in from Patna bureau</h3>
+              <p class="muted">Breaking coverage from our state capital team</p>
+            </div>
+            <div class="live-headline-card">
+              <h3 class="headline-md">Market and commodity reaction to policy announcements</h3>
+              <p class="muted">Live tracking of economic indicators</p>
+            </div>
+            <div class="live-headline-card">
+              <h3 class="headline-md">District weather cells issue high-alert advisories</h3>
+              <p class="muted">Real-time weather monitoring across Bihar</p>
+            </div>
+            <div class="live-headline-card">
+              <h3 class="headline-md">Sports desk tracks major domestic fixtures live</h3>
+              <p class="muted">Score updates and match analysis</p>
+            </div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="interaction-card">
+            <h3>💬 Join the Conversation</h3>
+            <input type="text" placeholder="Your Name" />
+            <textarea rows="4" placeholder="Share your question or comment for our show hosts..."></textarea>
+            <button type="button">Send Message</button>
+          </div>
+          <div class="ad-slot" style="margin-top:1rem; border-radius:14px;">Sidebar Ad</div>
+        </aside>
+      </div>
+
     </div>
   </main>
   <div id="site-footer"></div>
   <script src="/assets/js/firebase-db.js" defer></script>
   <script src="/assets/js/app.js" defer></script>
-  
 </body>
 </html>
